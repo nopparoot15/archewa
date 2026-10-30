@@ -1,0 +1,414 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+
+namespace MyArcade
+{
+	/// <summary>
+	/// The special move, ported from Akane's "dragon slash" (Player.StartAdrenalineMode / DragonSlashCoroutine):
+	/// a charge bar of three parts fills with kills. Space (with one part full) slows time and shows a line to the
+	/// cursor; a left click then dashes the hero along that line and cuts down everything the line touches.
+	/// A plain class (the Player HAS a SlashSkill), driven by Player.Update through <see cref="Tick"/>.
+	/// </summary>
+	public class SlashSkill : IDisposable
+	{
+		public const int Parts = 3;
+
+		// numbers read from Akane's Player component: 0.1 per hit + up to 20 combo x 0.0035, slow-motion 0.7 for 6 x 0.7 seconds;
+		// the part being filled leaks away (0.07 per second) but never below the last full part, so full parts are kept
+		private const float GainPerHit = 0.15f;
+		private const float GainPerComboStep = 0.0035f;
+		private const int MaxComboBonus = 20;
+		private const float AimSeconds = 6f * 0.7f;    // real seconds you have to pick the line
+		private const float AimTimeScale = 0.7f;
+		private const float MaxRange = 13f;
+		private const float MinRange = 2.5f;
+		private const float SlashRadius = 1.0f;        // half the width of the cut
+		private const int GiantDamage = 6;
+		private const float DrainPerSecond = 0.07f;  // Akane: the part being filled leaks away while you are not fighting
+		private const float UltDrainPerSecond = 0.85f; // Akane ultAdrenalineDecreasseSpeed: the full bar lasts about 3.5 s
+
+		private readonly Player owner;
+		private readonly LineRenderer zoneLine;        // wide, faint: where the cut will land
+		private readonly LineRenderer aimLine;         // thin, bright: the path
+		private readonly LineRenderer reticle;         // circle at the end point
+		private readonly LineRenderer flashLine;       // the white streak left by the slash
+		private int combo;
+		private float aimEndsAt;
+		private bool attackWasHeld;
+		private Vector3 target;
+
+		/// <summary>0..3: every whole number is one charged part.</summary>
+		public float Points { get; private set; }
+		private int checkpoint;   // whole parts already earned: the leak never goes below them
+		public bool IsAiming { get; private set; }
+		public bool IsSlashing { get; private set; }
+		public bool IsUlting { get; private set; }
+
+		private readonly List<Enemy> ultPool = new List<Enemy>();   // rivals on screen that may still be struck
+		private readonly List<Enemy> ultHit = new List<Enemy>();    // rivals struck so far: they all fall when it ends
+		private readonly List<LineRenderer> ultLines = new List<LineRenderer>();
+
+		/// <summary>While time is slowed the hero still walks at normal speed (Akane does the same).</summary>
+		public float MoveBoost => IsAiming ? Mathf.Min(1f / Mathf.Max(Time.timeScale, 0.05f), 8f) : 1f;
+
+		public SlashSkill(Player owner)
+		{
+			this.owner = owner;
+			zoneLine = MakeLine("SlashZone", new Color(0.4f, 0.9f, 1f, 0.16f), SlashRadius * 2f, 2);
+			aimLine = MakeLine("SlashAim", new Color(0.7f, 1f, 1f, 0.95f), 0.14f, 2);
+			reticle = MakeLine("SlashReticle", new Color(0.7f, 1f, 1f, 0.95f), 0.12f, 33);
+			flashLine = MakeLine("SlashFlash", Color.white, 0.7f, 2);
+			GameEvents.EnemyKilled += OnKill;
+			GameEvents.Deflected += OnDeflect;
+			GameEvents.ComboChanged += OnCombo;
+		}
+
+		public void Dispose()
+		{
+			GameEvents.EnemyKilled -= OnKill;
+			GameEvents.Deflected -= OnDeflect;
+			GameEvents.ComboChanged -= OnCombo;
+			foreach (LineRenderer line in new[] { zoneLine, aimLine, reticle, flashLine })
+			{
+				if (line != null)
+				{
+					UnityEngine.Object.Destroy(line.gameObject);
+				}
+			}
+		}
+
+		private void OnKill(Enemy enemy) { Gain(GainPerHit + Mathf.Min(combo, MaxComboBonus) * GainPerComboStep); }
+		private void OnDeflect(Vector3 at) { Gain(GainPerHit); }
+		private void OnCombo(int value) { combo = value; }
+
+		private void Gain(float amount)
+		{
+			if (IsAiming || IsSlashing)
+			{
+				return;
+			}
+			Points = Mathf.Min(Parts, Points + amount);
+			checkpoint = Mathf.Max(checkpoint, Mathf.FloorToInt(Points + 0.0001f));
+		}
+
+		/// <summary>Called every frame by the player. Handles the charge, the aiming mode and the click.</summary>
+		public void Tick(IInputSource input)
+		{
+			if (IsUlting)
+			{
+				UltTick(input);
+				return;
+			}
+			if (IsSlashing)
+			{
+				return;
+			}
+			if (!IsAiming)
+			{
+				// a part that is not full yet slowly empties again; a part that is full is a checkpoint and stays
+				if (Points > checkpoint)
+				{
+					Points = Mathf.Max(checkpoint, Points - DrainPerSecond * Time.deltaTime);
+				}
+				if (input.SpecialPressed && Points >= 1f && !owner.IsDashing)
+				{
+					BeginAim();
+				}
+				return;
+			}
+
+			SlowMotion.Pulse(AimTimeScale, 0.12f); // asked every frame, so time stays slow while we aim
+			UpdateTarget(input);
+			DrawAim();
+			CameraRig.Instance?.LeanToward(target - owner.transform.position);
+			Vector3 look = target - owner.transform.position;
+			look.y = 0f;
+			if (look.sqrMagnitude > 0.04f)
+			{
+				owner.transform.forward = look.normalized; // the hero turns to the line while he crouches
+			}
+
+			bool held = input.AttackHeld;
+			bool clicked = held && !attackWasHeld; // must release first: the click that starts the mode is not the cut
+			attackWasHeld = held;
+
+			if (input.DashPressed && Points >= Parts - 0.001f)
+			{
+				BeginUltimate(); // Akane's Slayer: with a full bar, right click starts the ultimate instead of a single slash
+			}
+			else if (input.SpecialPressed || Time.unscaledTime >= aimEndsAt)
+			{
+				Cancel();
+			}
+			else if (clicked)
+			{
+				owner.StartCoroutine(SlashRoutine());
+			}
+		}
+
+		public void Cancel()
+		{
+			IsAiming = false;
+			CameraRig.Instance?.LeanToward(Vector3.zero);
+			SetAimVisible(false);
+		}
+
+		private void BeginAim()
+		{
+			IsAiming = true;
+			aimEndsAt = Time.unscaledTime + AimSeconds;
+			attackWasHeld = true;
+			SetAimVisible(true);
+			GameEvents.RaiseSound("warning");
+		}
+
+		private void UpdateTarget(IInputSource input)
+		{
+			Vector3 from = owner.transform.position;
+			Vector3 to = owner.PointerOnGround(from + owner.transform.forward * MinRange);
+			Vector3 delta = to - from;
+			delta.y = 0f;
+			if (delta.magnitude < MinRange)
+			{
+				delta = (delta.sqrMagnitude > 0.01f ? delta.normalized : owner.transform.forward) * MinRange;
+			}
+			target = Arena.Clamp(from + Vector3.ClampMagnitude(delta, MaxRange));
+		}
+
+		// ---- the ultimate (Akane Player.UltimateAction / UltimateHit / EndingUltimate) -----------------------
+
+		private void BeginUltimate()
+		{
+			IsAiming = false;
+			SetAimVisible(false);
+			CameraRig.Instance?.LeanToward(Vector3.zero);
+			Vector3 from = owner.transform.position;
+			owner.transform.position = target;
+			owner.GrantInvulnerability(30f);
+			owner.RestoreStamina();
+			Enemy.Frozen = true; // everything stands still
+			ultPool.Clear();
+			ultHit.Clear();
+			Camera cam = Camera.main;
+			foreach (Enemy enemy in Enemy.AllActive)
+			{
+				if (enemy.IsDead || cam == null)
+				{
+					continue;
+				}
+				Vector3 view = cam.WorldToViewportPoint(enemy.transform.position);
+				if (view.z > 0f && view.x > 0f && view.x < 1f && view.y > 0f && view.y < 1f)
+				{
+					ultPool.Add(enemy); // only what is on screen can be hit
+				}
+			}
+			IsUlting = true;
+			IsSlashing = true;
+			owner.PlaySkillPose("ult_enter");
+			GameEvents.RaiseSound("heavy");
+			CameraRig.Shake(4f, 0.15f, 0.025f);
+			StartFlash(from, target);
+		}
+
+		private void UltTick(IInputSource input)
+		{
+			Points = Mathf.Max(0f, Points - UltDrainPerSecond * Time.deltaTime);
+			bool held = input.AttackHeld;
+			bool clicked = held && !attackWasHeld;
+			attackWasHeld = held;
+			if (clicked && ultPool.Count > 0)
+			{
+				// every click strikes a random rival on screen; they all die together when the bar runs out
+				int index = UnityEngine.Random.Range(0, ultPool.Count);
+				Enemy struck = ultPool[index];
+				ultPool.RemoveAt(index);
+				ultHit.Add(struck);
+				var line = MakeLine("UltTrail", new Color(1f, 1f, 1f, 0.9f), 0.35f, 2);
+				line.SetPosition(0, owner.transform.position + Vector3.up * 0.7f);
+				line.SetPosition(1, struck.transform.position + Vector3.up * 0.7f);
+				line.enabled = true;
+				ultLines.Add(line);
+				owner.PlaySlashPose();
+				GameEvents.RaiseSound("swing");
+				CameraRig.Shake(2f, 0.1f, 0.015f);
+			}
+			if (Points <= 0f || (ultPool.Count == 0 && ultHit.Count > 0))
+			{
+				IsUlting = false; // the last frame of the input loop; the routine below finishes it
+				owner.StartCoroutine(EndUltimate());
+			}
+		}
+
+		private IEnumerator EndUltimate()
+		{
+			owner.PlaySkillPose("ult_end");
+			yield return new WaitForSecondsRealtime(0.5f);
+			Points = 0f;
+			checkpoint = 0;
+			Enemy.Frozen = false;
+			foreach (LineRenderer line in ultLines)
+			{
+				if (line != null)
+				{
+					UnityEngine.Object.Destroy(line.gameObject);
+				}
+			}
+			ultLines.Clear();
+			foreach (Enemy enemy in ultHit)
+			{
+				if (enemy == null || enemy.IsDead)
+				{
+					continue;
+				}
+				if (enemy is Boss boss)
+				{
+					boss.TakeSlayerHit();
+				}
+				else
+				{
+					enemy.TakeDamage(999, owner.gameObject);
+				}
+				GameEvents.RaiseHitLanded(enemy.transform.position + Vector3.up, 4);
+			}
+			if (ultHit.Count > 0)
+			{
+				GameEvents.RaiseUltimateKilled(ultHit.Count);
+				GameEvents.RaiseSound("heavy");
+				SlowMotion.Pulse(0.25f, 0.3f);
+			}
+			ultHit.Clear();
+			ultPool.Clear();
+			owner.SetInvulnerableFor(0.6f); // back to normal
+			IsSlashing = false;
+		}
+
+		private IEnumerator SlashRoutine()
+		{
+			IsSlashing = true;
+			IsAiming = false;
+			CameraRig.Instance?.LeanToward(Vector3.zero);
+			Points = Mathf.Max(0f, Points - 1f);
+			checkpoint = Mathf.FloorToInt(Points + 0.0001f);
+			SetAimVisible(false);
+
+			Vector3 from = owner.transform.position;
+			Vector3 to = target;
+			Vector3 direction = to - from;
+			direction.y = 0f;
+			float distance = direction.magnitude;
+			direction = distance > 0.01f ? direction / distance : owner.transform.forward;
+
+			// everything the thick line passes through (SphereCast = Akane's BoxCast)
+			var victims = new List<Enemy>();
+			foreach (RaycastHit hit in Physics.SphereCastAll(from + Vector3.up * 0.8f, SlashRadius, direction, distance))
+			{
+				Enemy enemy = hit.collider.GetComponentInParent<Enemy>();
+				if (enemy != null && !enemy.IsDead && !victims.Contains(enemy))
+				{
+					victims.Add(enemy);
+				}
+			}
+
+			owner.GrantInvulnerability(1.2f);
+			owner.RestoreStamina();
+			Enemy.Frozen = true; // Akane freezes everything for the length of the slash
+			SlowMotion.Pulse(0.05f, 0.22f); // the freeze before the cut lands
+			owner.transform.position = to;
+			owner.transform.forward = direction;
+			owner.PlaySlashPose();
+			GameEvents.RaiseSound("swing");
+			StartFlash(from, to);
+
+			yield return new WaitForSecondsRealtime(0.3f);
+
+			Enemy.Frozen = false;
+			foreach (Enemy enemy in victims)
+			{
+				if (enemy != null && !enemy.IsDead)
+				{
+					enemy.TakeDamage(enemy is Brute ? GiantDamage : 99, owner.gameObject);
+					GameEvents.RaiseHitLanded(enemy.transform.position + Vector3.up, 4);
+				}
+			}
+			if (victims.Count > 0)
+			{
+				GameEvents.RaiseSlashLanded(victims.Count);
+				CameraRig.Shake(2f, 0.1f, 0.015f);
+				GameEvents.RaiseSound("heavy");
+				SlowMotion.Pulse(0.25f, 0.25f);
+			}
+
+			IsSlashing = false;
+		}
+
+		// ---- drawing -----------------------------------------------------------------------
+
+		private static LineRenderer MakeLine(string name, Color color, float width, int points)
+		{
+			var go = new GameObject(name);
+			var line = go.AddComponent<LineRenderer>();
+			line.useWorldSpace = true;
+			line.positionCount = points;
+			line.widthMultiplier = width;
+			line.numCapVertices = 4;
+			line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+			line.receiveShadows = false;
+			var material = new Material(Shader.Find("Sprites/Default"));
+			material.color = Color.white; // the colour comes from the line's own vertex colours
+			line.sharedMaterial = material;
+			line.startColor = color;
+			line.endColor = color;
+			line.enabled = false;
+			return line;
+		}
+
+		private void SetAimVisible(bool visible)
+		{
+			zoneLine.enabled = visible;
+			aimLine.enabled = visible;
+			reticle.enabled = visible;
+		}
+
+		private void DrawAim()
+		{
+			Vector3 from = owner.transform.position + Vector3.up * 0.12f;
+			Vector3 to = target + Vector3.up * 0.12f;
+			zoneLine.SetPosition(0, from);
+			zoneLine.SetPosition(1, to);
+			aimLine.SetPosition(0, from);
+			aimLine.SetPosition(1, to);
+			float pulse = 0.5f + 0.5f * Mathf.Sin(Time.unscaledTime * 9f);
+			for (int i = 0; i < reticle.positionCount; i++)
+			{
+				float angle = i / (float)(reticle.positionCount - 1) * Mathf.PI * 2f;
+				float radius = 0.55f + pulse * 0.12f;
+				reticle.SetPosition(i, to + new Vector3(Mathf.Cos(angle), 0f, Mathf.Sin(angle)) * radius);
+			}
+		}
+
+		private void StartFlash(Vector3 from, Vector3 to)
+		{
+			flashLine.SetPosition(0, from + Vector3.up * 0.7f);
+			flashLine.SetPosition(1, to + Vector3.up * 0.7f);
+			flashLine.enabled = true;
+			owner.StartCoroutine(FadeFlash());
+		}
+
+		private IEnumerator FadeFlash()
+		{
+			const float duration = 0.4f;
+			for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
+			{
+				float k = 1f - t / duration;
+				var color = new Color(1f, 1f, 1f, k);
+				flashLine.startColor = color;
+				flashLine.endColor = color;
+				flashLine.widthMultiplier = 0.7f * k;
+				yield return null;
+			}
+			flashLine.enabled = false;
+		}
+	}
+}

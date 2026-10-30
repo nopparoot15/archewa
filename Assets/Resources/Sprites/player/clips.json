@@ -1,0 +1,87 @@
+{
+ "idle": {
+  "frames": 4,
+  "fps": 5,
+  "loop": true
+ },
+ "walk": {
+  "frames": 9,
+  "fps": 12,
+  "loop": true
+ },
+ "run": {
+  "frames": 11,
+  "fps": 16,
+  "loop": true
+ },
+ "walk_side": {
+  "frames": 8,
+  "fps": 12,
+  "loop": true
+ },
+ "walk_front": {
+  "frames": 8,
+  "fps": 12,
+  "loop": true
+ },
+ "idle_front": {
+  "frames": 8,
+  "fps": 6,
+  "loop": true
+ },
+ "walk_back": {
+  "frames": 8,
+  "fps": 12,
+  "loop": true
+ },
+ "idle_side": {
+  "frames": 8,
+  "fps": 6,
+  "loop": true
+ },
+ "run_side": {
+  "frames": 8,
+  "fps": 16,
+  "loop": true
+ },
+ "run_back": {
+  "frames": 8,
+  "fps": 16,
+  "loop": true
+ },
+ "run_front": {
+  "frames": 8,
+  "fps": 16,
+  "loop": true
+ },
+ "dash_side": {
+  "frames": 8,
+  "fps": 20,
+  "loop": true
+ },
+ "parry_side": {
+  "frames": 8,
+  "fps": 20,
+  "loop": false
+ },
+ "hurt_side": {
+  "frames": 8,
+  "fps": 10,
+  "loop": false
+ },
+ "die_side": {
+  "frames": 7,
+  "fps": 9,
+  "loop": false
+ },
+ "shoot_side": {
+  "frames": 8,
+  "fps": 24,
+  "loop": false
+ },
+ "pipe_swing": {
+  "frames": 5,
+  "fps": 14,
+  "loop": false
+ }
+}

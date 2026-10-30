@@ -1,0 +1,1 @@
+8 complete-body frames split into exact synchronized upper/lower pairs. PPU50 200x128.

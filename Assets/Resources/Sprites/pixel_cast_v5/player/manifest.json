@@ -1,0 +1,166 @@
+{
+  "id": "player",
+  "clips": [
+    {
+      "name": "idle",
+      "direction": "front",
+      "count": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "idle",
+      "direction": "back",
+      "count": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "idle",
+      "direction": "right",
+      "count": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "direction": "front",
+      "count": 8,
+      "fps": 40,
+      "loop": false
+    },
+    {
+      "name": "attack",
+      "direction": "back",
+      "count": 8,
+      "fps": 40,
+      "loop": false
+    },
+    {
+      "name": "attack",
+      "direction": "right",
+      "count": 8,
+      "fps": 40,
+      "loop": false
+    },
+    {
+      "name": "shoot",
+      "direction": "front",
+      "count": 8,
+      "fps": 32,
+      "loop": false
+    },
+    {
+      "name": "shoot",
+      "direction": "back",
+      "count": 8,
+      "fps": 32,
+      "loop": false
+    },
+    {
+      "name": "shoot",
+      "direction": "right",
+      "count": 8,
+      "fps": 32,
+      "loop": false
+    },
+    {
+      "name": "guard",
+      "direction": "front",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "guard",
+      "direction": "back",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "guard",
+      "direction": "right",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "dash",
+      "direction": "right",
+      "count": 8,
+      "fps": 32,
+      "loop": false
+    },
+    {
+      "name": "slash_ready",
+      "direction": "right",
+      "count": 4,
+      "fps": 16,
+      "loop": false
+    },
+    {
+      "name": "slash_cut",
+      "direction": "right",
+      "count": 8,
+      "fps": 27,
+      "loop": false
+    },
+    {
+      "name": "ult_enter",
+      "direction": "right",
+      "count": 4,
+      "fps": 16,
+      "loop": false
+    },
+    {
+      "name": "ult_strike",
+      "direction": "right",
+      "count": 8,
+      "fps": 32,
+      "loop": false
+    },
+    {
+      "name": "ult_end",
+      "direction": "right",
+      "count": 4,
+      "fps": 8,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "direction": "right",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "die",
+      "direction": "right",
+      "count": 8,
+      "fps": 10,
+      "loop": false
+    },
+    {
+      "name": "run",
+      "direction": "front",
+      "count": 8,
+      "fps": 16,
+      "loop": true
+    },
+    {
+      "name": "run",
+      "direction": "back",
+      "count": 8,
+      "fps": 16,
+      "loop": true
+    },
+    {
+      "name": "run",
+      "direction": "right",
+      "count": 8,
+      "fps": 16,
+      "loop": true
+    }
+  ]
+}

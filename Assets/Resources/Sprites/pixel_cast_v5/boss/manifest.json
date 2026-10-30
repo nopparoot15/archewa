@@ -1,0 +1,103 @@
+{
+  "id": "boss",
+  "clips": [
+    {
+      "name": "run",
+      "direction": "front",
+      "count": 8,
+      "fps": 16,
+      "loop": true
+    },
+    {
+      "name": "run",
+      "direction": "back",
+      "count": 8,
+      "fps": 16,
+      "loop": true
+    },
+    {
+      "name": "run",
+      "direction": "right",
+      "count": 8,
+      "fps": 16,
+      "loop": true
+    },
+    {
+      "name": "idle",
+      "direction": "front",
+      "count": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "idle",
+      "direction": "back",
+      "count": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "idle",
+      "direction": "right",
+      "count": 4,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "attack",
+      "direction": "right",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "special",
+      "direction": "right",
+      "count": 4,
+      "fps": 12,
+      "loop": false
+    },
+    {
+      "name": "hurt",
+      "direction": "right",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "die",
+      "direction": "right",
+      "count": 8,
+      "fps": 10,
+      "loop": false
+    },
+    {
+      "name": "attack",
+      "direction": "front",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "attack",
+      "direction": "back",
+      "count": 4,
+      "fps": 20,
+      "loop": false
+    },
+    {
+      "name": "special",
+      "direction": "front",
+      "count": 4,
+      "fps": 12,
+      "loop": false
+    },
+    {
+      "name": "special",
+      "direction": "back",
+      "count": 4,
+      "fps": 12,
+      "loop": false
+    }
+  ]
+}
