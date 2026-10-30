@@ -5,18 +5,15 @@ namespace MyArcade
 	/// <summary>Rival mechanic student: runs at the player and throws punches.</summary>
 	public class Chaser : Enemy
 	{
-		protected float contactRange = 2.0f; // Akane: range 50 against a 45 box
+		protected float contactRange = 2.0f;
 		protected int contactDamage = 1;
 		protected float contactCooldown = 1.0f;
 		protected string displayName = "MECHANIC";
-		protected float windupTime = 0.4f; // visible wind-up before the hit: one hit kills the hero, so he must be able to dodge
-		// Akane's EnemyRegular.isSomeoneAttacking: only one rival of the crowd starts an attack at a time; the next one may
-		// start 0.35 s later, so the hero faces a queue of single attackers instead of everyone hitting at once
+		protected float windupTime = 0.4f;
 		private const float AttackTokenSeconds = 0.35f;
 		private static float attackTokenFreeAt;
 
-		// Akane EnemyRegular: a rival that bumps into a closer one wanders to a random point in a wide circle around the hero
-		// (targetRadius 250 = about 11.5 units) for repositioningTime = 5 s, so the crowd spreads out and flanks
+
 		private const float RepositionRadius = 250f * 8.32f / 180f;
 		private const float RepositionSeconds = 5f;
 		private Vector3 detourOffset;
@@ -34,7 +31,7 @@ namespace MyArcade
 
 		protected override void Awake()
 		{
-			moveSpeed = 5.0f; // Akane: 110 against the hero's 180
+			moveSpeed = 5.0f;
 			maxHealth = 1;
 			base.Awake();
 		}
@@ -113,9 +110,9 @@ namespace MyArcade
 		protected override void Awake()
 		{
 			base.Awake(); // let Chaser set its defaults first...
-			moveSpeed = 3.2f;     // ...then override them (Akane: 70 against the hero's 180)
-			maxHealth = 15;        // five pipe hits, like Akane's 25 hit points against a 5-point melee hit
-			contactRange = 1.7f; // Akane BigDude: range 35 against a 35 box
+			moveSpeed = 3.2f;
+			maxHealth = 15;
+			contactRange = 1.7f;
 			contactDamage = 2;
 			contactCooldown = 1.5f;
 			displayName = "FINAL-YEAR SENIOR";
@@ -172,13 +169,12 @@ namespace MyArcade
 	{
 		// protected: Sniper and Shotgunner change these numbers (and Fire) instead of rewriting the whole class
 		protected float preferredDistance = 8f;
-		// numbers from Akane's EnemyShooter component: 1 s warning, a burst of 3 shots 0.3 s apart, each shot aimed
-		// 0.025 s before it leaves, bullets about eleven times the hero's speed, 1-4 s rest between bursts
+
 		protected float aimTime = 1.3f;       // the red laser follows the hero this long (dash or parry as the shots come)
 		protected float lockTime = 0.12f;    // the direction is frozen this long before every shot
 		protected float shotGap = 0.3f;
 		protected int shotsPerBurst = 2;
-		protected float cooldown = 5f; // Akane: attackDelay 4
+		protected float cooldown = 5f;
 		protected float bulletSpeed = 92f;
 		protected float shootRange = 14f;
 
@@ -211,7 +207,7 @@ namespace MyArcade
 
 		protected override void Awake()
 		{
-			moveSpeed = 4.2f; // Akane: 90 against the hero's 180
+			moveSpeed = 4.2f;
 			maxHealth = 1;
 			base.Awake();
 		}
@@ -231,7 +227,7 @@ namespace MyArcade
 		{
 			FaceTarget();
 			float distance = DistanceToTarget();
-			bool busy = aimEndsAt > 0f || shotsLeft > 0; // like Akane's shooter: stands still while aiming and firing
+			bool busy = aimEndsAt > 0f || shotsLeft > 0;
 			if (!busy)
 			{
 				if (distance > preferredDistance + 1.5f)

@@ -14,9 +14,7 @@ namespace MyArcade
 	{
 		private const float HitInvulnerability = 0.9f;
 		public const float RunSpeedRatio = 1.6f; // running multiplier on the base move speed
-		private const float RunSpeed = RunSpeedRatio; // like Akane: no walk, the fighter always runs
-		// parry (Akane Player.ParryCoroutine): the stance lasts up to 1.5 s and keeps blocking every melee hit and bullet,
-		// attacking ends it early, then 0.45 s must pass before the next one
+		private const float RunSpeed = RunSpeedRatio;
 		public const float ParryWindow = 1.5f;
 		private const float ParryDelay = 0.3f;
 		private const float AttackDeflectFrame = 0.22f; // a swing also sends a bullet that reaches the hero toward the nearest rival
@@ -24,16 +22,15 @@ namespace MyArcade
 		private float parryReadyAt;
 		private float attackDeflectUntil;
 
-		// pen gun = Akane's handgun (GunShoot.handGun): 8 rounds, 0.2 s between shots, damage 3, slow passive reload
-		// (8 rounds per 30 s) and a refill of the same size for every rival beaten; the bullet lives one second
+
 		public const int MaxAmmo = 8;
 		private const float AmmoPerSecond = 8f / 30f;
 		private const float AmmoPerKill = 0.45f;
 		private const float ShotDelay = 0.2f;
-		private const float BulletSpeed = 92f; // Akane: 2000 vs a running speed of 180
+		private const float BulletSpeed = 92f;
 		private const int BulletDamage = 3;
 
-		// stamina (Akane): every swing costs a tenth, an empty bar means no swinging; it refills 1 s after the last swing
+
 		private const float StaminaPerSwing = 0.07f;
 		private const float StaminaChargeDelay = 1f;
 		private const float StaminaChargeSpeed = 2f;
@@ -89,7 +86,7 @@ namespace MyArcade
 		protected override void Awake()
 		{
 			moveSpeed = 5.2f;
-			maxHealth = 1; // like Akane: one hit and the hero is down
+			maxHealth = 1;
 			base.Awake();
 		}
 
@@ -125,7 +122,7 @@ namespace MyArcade
 			Vector3 face = IsDashing ? dashDirection : aim != Vector3.zero ? aim : LastMoveDirection;
 			if (IsAiming && !IsDashing)
 			{
-				// aiming the pen gun: the hero turns to the mouse (Akane aims the gun at the cursor)
+
 				Vector3 toMouse = PointerOnGround(transform.position) - transform.position;
 				toMouse.y = 0f;
 				if (toMouse.sqrMagnitude > 0.04f)
@@ -171,7 +168,7 @@ namespace MyArcade
 
 			if (IsAiming && input.AttackHeld && !IsDashing)
 			{
-				// like Akane the gun follows the mouse; holding the button keeps firing every ShotDelay
+
 				Vector3 gunAim = PointerOnGround(transform.position + aim) - transform.position;
 				gunAim.y = 0f;
 				gunAim = gunAim.sqrMagnitude > 0.04f ? gunAim.normalized : aim;
@@ -240,7 +237,7 @@ namespace MyArcade
 			return true;
 		}
 
-		/// <summary>Akane TryInitDash: dashing drops the guard (and starts the rest after it).</summary>
+
 		public void CancelParryForDash()
 		{
 			if (IsParrying)
@@ -255,10 +252,7 @@ namespace MyArcade
 			parryReadyAt = Time.time + ParryDelay;
 		}
 
-		/// <summary>
-		/// Akane's Character.TakeShot: a bullet that reaches the hero is sent back along its own path (small random angle)
-		/// while guarding, or toward the nearest rival, ten times as strong, if it arrives during a swing.
-		/// </summary>
+
 		public bool TakeShot(Bullet bullet)
 		{
 			if (bullet.WasDeflectedBy(gameObject))
@@ -338,7 +332,7 @@ namespace MyArcade
 			Ammo = Mathf.Min(MaxAmmo, Ammo + AmmoPerKill * Stats.AmmoRegenScale);
 		}
 
-		/// <summary>Called by SlashSkill: the slash refills the stamina (as in Akane).</summary>
+
 		public void RestoreStamina()
 		{
 			Stamina = 1f;
@@ -383,7 +377,7 @@ namespace MyArcade
 			}
 			if (IsParrying && !(source != null && source.GetComponent<IUnparryable>() != null))
 			{
-				// Akane's Player.TakeRegularMelee while guarding: sparks and a clang, no damage, and the guard stays up
+
 				CameraRig.Shake(2f, 0.1f, 0.015f);
 				GameEvents.RaiseDeflected(transform.position + Vector3.up);
 				GameEvents.RaiseSound("parry");

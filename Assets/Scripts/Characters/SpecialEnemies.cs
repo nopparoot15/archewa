@@ -2,20 +2,15 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>Marks an attack that the guard (parry) cannot stop, like Akane's assassin charge that kills on contact.</summary>
+
 	public interface IUnparryable
 	{
 	}
 
-	/// <summary>
-	/// Akane's assassin (EnemyAssassin.cs): walks up, stops, warns for one second, then dashes in a straight line at 3x the
-	/// hero's speed and kills on contact (the guard does not help, only a roll does). Until the dash ends it parries every
-	/// swing and sends bullets back; for the short moment of braking after the dash it is open and dies to one hit.
-	/// </summary>
+
 	public class Assassin : Enemy, IShootable, IUnparryable
 	{
-		// Main Stage values: speed 110/180 of the hero, warning 1 s, charge 550 (about 25 units/s) for 1 s, 4 s between
-		// attacks, a bullet it deflects flies back within +-45 degrees. The braking pause is 0.3 s + 0.6 s.
+
 		private const float AttackRange = 6.9f;
 		private const float WarnTime = 1.3f;
 		private const float ChargeSpeed = 21f;
@@ -86,7 +81,7 @@ namespace MyArcade
 						hit = true;
 						target.TakeDamage(1, gameObject);
 						GameEvents.RaiseHitLanded(target.transform.position + Vector3.up, 2);
-						phaseEndsAt = Time.time; // Akane: the charge ends at once when it kills
+						phaseEndsAt = Time.time;
 					}
 					if (Time.time >= phaseEndsAt)
 					{
@@ -141,16 +136,10 @@ namespace MyArcade
 		}
 	}
 
-	/// <summary>
-	/// The gang leader, after Akane's Katsuro (Boss.cs). He has a guard: he shrugs off everything (sparks, no damage) until a
-	/// special attack of his own ends. He leaps toward you in a zigzag, then picks melee (50%), a three-shot burst (25%) or
-	/// the special: a warning, then three dashes at you. After two normal attacks the next one is always the special, and when
-	/// it ends his guard breaks: he is pushed back and stays open for a short time that gets shorter with every boss.
-	/// </summary>
+
 	public class Boss : Brute
 	{
-		// Main Stage: zigzag 5 jumps of 0.15 s at 500 (about 23 units/s) over 1 s, speed 200/180, 2 attacks before the
-		// special, 3 sub-charges 0.46 s apart after a 1 s warning, open for 1.15 / 0.7 / 0.52 s (easy, medium, hard)
+
 		private const float ZigzagSpeed = 23f;
 		private const float ZigzagJump = 0.15f;
 		private const int ZigzagJumps = 5;
@@ -435,7 +424,7 @@ namespace MyArcade
 			phaseEndsAt = Time.time + PushTime;
 			RaiseAttacked("windup");
 			GameEvents.RaiseHitLanded(transform.position + Vector3.up, 4);
-			CameraRig.Shake(3f, 0.15f, 0.02f); // Akane Boss.StartVulnerableMode
+			CameraRig.Shake(3f, 0.15f, 0.02f);
 			SlowMotion.Pulse(0.3f, 0.12f);
 		}
 
@@ -456,7 +445,7 @@ namespace MyArcade
 			base.TakeDamage(amount, source);
 		}
 
-		/// <summary>Akane Boss.TakeSlayerHit: the ultimate goes through his guard.</summary>
+
 		public void TakeSlayerHit()
 		{
 			if (!IsDead)

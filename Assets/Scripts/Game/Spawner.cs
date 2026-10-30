@@ -16,7 +16,7 @@ namespace MyArcade
 		private IBulletSpawner bullets;
 		private readonly Dictionary<EnemyType, ObjectPool<Enemy>> pools = new Dictionary<EnemyType, ObjectPool<Enemy>>();
 		private int alive;
-		private int aliveRegular;          // Akane's EnemyRegular.cont: the crowd limit only counts regular rivals
+		private int aliveRegular;
 		private bool openingDone;
 		private float nextRegularAt;
 		private float nextSpecialAt;
@@ -74,7 +74,7 @@ namespace MyArcade
 				{
 					aliveRegular--;
 				}
-				TrySpawnRegular(); // every rival that falls is replaced at once (Akane: Spawner.Spawn() in every TakeRegularMelee)
+				TrySpawnRegular();
 			}
 		}
 
@@ -100,7 +100,7 @@ namespace MyArcade
 				return;
 			}
 
-			// Akane's Spawner coroutines: a regular rival every few seconds, a special one on a slower timer
+
 			if (Time.time >= nextRegularAt)
 			{
 				nextRegularAt = Time.time + Mathf.Lerp(6f, 3.5f, NormalKills / 150f);
@@ -119,7 +119,7 @@ namespace MyArcade
 			}
 		}
 
-		/// <summary>Akane DificultParameters, all linear in the kill count: regular limit 4 to 35 over 50 kills (plus 3 per boss here).</summary>
+
 		private int RegularLimit()
 		{
 			return Mathf.RoundToInt(Mathf.Lerp(3f, 24f, NormalKills / 150f)) + BossesDefeated * 3;
@@ -130,7 +130,7 @@ namespace MyArcade
 			return Mathf.Lerp(25f, 8f, kills / 500f);
 		}
 
-		/// <summary>Akane: the regular rivals' speed climbs from 110 to 180 (the hero's speed) over 1000 kills.</summary>
+
 		private float RegularSpeedScale()
 		{
 			return Mathf.Lerp(95f, 165f, NormalKills / 1500f) / 110f;

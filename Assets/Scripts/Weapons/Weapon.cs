@@ -111,7 +111,7 @@ namespace MyArcade
 				}
 			}
 
-			// Akane's AttackCollider.Hit: a swing only ever connects with the CLOSEST rival in reach
+
 			if (closest != null)
 			{
 				Vector3 away = closestCollider.transform.position - context.Origin;

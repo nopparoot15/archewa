@@ -43,7 +43,7 @@ namespace MyArcade
 		/// <summary>Optional animation cue. Subclasses expose their state without the renderer depending on concrete AI classes.</summary>
 		public virtual string VisualPose => null;
 
-		/// <summary>Akane's Freeze(): while the ultimate runs every rival (and every bullet) stands still.</summary>
+
 		public static bool Frozen { get; set; }
 
 		public void Init(Player target, Action<Enemy> releaseCallback)
@@ -158,7 +158,7 @@ namespace MyArcade
 			return enemy.target != null ? (enemy.target.transform.position - enemy.transform.position).sqrMagnitude : 0f;
 		}
 
-		/// <summary>Called while another rival that is closer to the hero stands in the way (Akane's EnemyRegular.OnTriggerEnter).</summary>
+
 		protected virtual void OnBlockedByCloser()
 		{
 		}

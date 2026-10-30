@@ -3,16 +3,10 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// A flying projectile. It never asks "is this the player or a zombie?": it only checks
-	/// for IDamageable and for the opposite team (programming against an interface).
-	/// It can be reflected: it then flies back and belongs to the other team.
-	/// Like Akane's bullets it is very fast (about eleven times the hero's speed) and lives one second, so it is checked
-	/// along its whole path every frame (a sweep), otherwise it would fly straight through a rival or the hero.
-	/// </summary>
+
 	public class Bullet : MonoBehaviour, IPoolable
 	{
-		private const float Lifetime = 1f; // Akane: GunShoot.bulletDuration
+		private const float Lifetime = 1f;
 		private const float Radius = 0.18f;
 
 		private float speed;
@@ -48,7 +42,7 @@ namespace MyArcade
 			spawnTime = Time.time;
 		}
 
-		/// <summary>Sends the bullet back: new direction, new team and damage, the same speed (as in Akane).</summary>
+
 		public void Reflect(Vector3 newDirection, Team newTeam, GameObject newOwner, int newDamage)
 		{
 			transform.forward = newDirection;
@@ -68,7 +62,7 @@ namespace MyArcade
 			owner = null;
 		}
 
-		/// <summary>Akane's dodgeFromShots: an enemy bullet that passes close to the hero without touching counts as a dodge.</summary>
+
 		private void CheckDodge(float distance)
 		{
 			if (team != Team.Enemy || dodgeCounted)
@@ -116,7 +110,7 @@ namespace MyArcade
 					return;
 				}
 				target.TakeDamage(damage, owner);
-				CameraRig.Shake(1f, 0.08f, 0.015f); // Akane Bullet.OnTriggerEnter
+				CameraRig.Shake(1f, 0.08f, 0.015f);
 				if (team == Team.Player && target is Enemy)
 				{
 					GameEvents.RaiseBulletHitEnemy();

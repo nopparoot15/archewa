@@ -3,22 +3,16 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Akane's gameplay camera (GameCamera.cs and the Main Stage camera): ORTHOGRAPHIC, tilted 60 degrees, orthographic size 180
-	/// against a hero speed of 180 (so the screen is two hero-seconds tall), following with Lerp(pos, target, dt * 3) and
-	/// clamped to the edges of the street.
-	/// Shake is Akane's too: every <c>frequency</c> seconds the camera is kicked by a random vector of length <c>magnitude</c>,
-	/// nothing resets it, the follow pulls it back. Orbits slowly on the title screen.
-	/// </summary>
+
 	public class CameraRig : MonoBehaviour
 	{
-		// Akane units -> street units: the hero runs 180 there and 8.32 here
+
 		private const float UnitsPerPixel = 8.32f / 180f;
 		private const float OrthoSize = 180f * UnitsPerPixel;
 		private const float Pitch = 60f;
 		private const float FollowSpeed = 3f;
 		private const float Distance = 40f;
-		private const float AimSight = 125f * UnitsPerPixel; // Akane's adrenalineModeSight: the view leans toward the slash line
+		private const float AimSight = 125f * UnitsPerPixel;
 
 		public static CameraRig Instance { get; private set; }
 
@@ -59,13 +53,13 @@ namespace MyArcade
 			}
 		}
 
-		/// <summary>The view leans toward a point while the slash line is chosen (Akane ShiftOffsetCamera).</summary>
+
 		public void LeanToward(Vector3 direction)
 		{
 			sightOffset = direction.sqrMagnitude > 0.001f ? direction.normalized * AimSight : Vector3.zero;
 		}
 
-		/// <summary>Akane GameCamera.Shake: magnitude and frequency are in the original's pixels and seconds.</summary>
+
 		public static void Shake(float magnitude, float duration, float frequency = 0.05f)
 		{
 			if (Instance != null && GameSettings.ScreenShake)
@@ -120,7 +114,7 @@ namespace MyArcade
 			focus.x = Mathf.Clamp(focus.x, -limitX, limitX);
 			focus.z = Mathf.Clamp(focus.z, -limitZ, limitZ);
 
-			// shake kicks are added to the camera and decay through the follow (they are part of the focus, like Akane's position)
+
 			focus += shakeKick;
 			shakeKick = Vector3.zero;
 

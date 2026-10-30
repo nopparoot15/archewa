@@ -23,7 +23,7 @@ namespace MyArcade
 			holdUntil = Mathf.Max(holdUntil, Time.unscaledTime + seconds);
 		}
 
-		/// <summary>Akane SlowMotion.HitFreeze: 10% speed for a blink (0.0045 s of game time = 0.045 s real), then straight back to full speed.</summary>
+
 		public static void HitFreeze()
 		{
 			Pulse(0.1f, 0.045f);

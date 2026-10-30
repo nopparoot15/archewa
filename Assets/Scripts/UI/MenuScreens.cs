@@ -5,13 +5,7 @@ using UnityEngine.UI;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// The menus, laid out like Akane's: a left-aligned list on the title screen (PLAY, TUTORIAL, OPTIONS, CREDITS, EXIT),
-	/// a pause menu (RESUME, RESTART, OPTIONS, HOW TO PLAY, MAIN MENU) and the OPTIONS, HOW TO PLAY and CREDITS screens.
-	/// The panels are real objects in the Hierarchy (Canvas/Title/TitleMenu, Canvas/Pause/PauseMenu, Canvas/Options...);
-	/// every item is a child called "Item0", "Item1"... with a "Label" (TextMeshPro) and a "Mark" (the selection bar).
-	/// This class only chooses which item is lit and what it does. It works with the keyboard (W/S, Enter) and the mouse.
-	/// </summary>
+
 	public class MenuScreens : MonoBehaviour
 	{
 		private static readonly Color Lit = new Color(.96f, .30f, .36f);

@@ -5,18 +5,12 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// The special move, ported from Akane's "dragon slash" (Player.StartAdrenalineMode / DragonSlashCoroutine):
-	/// a charge bar of three parts fills with kills. Space (with one part full) slows time and shows a line to the
-	/// cursor; a left click then dashes the hero along that line and cuts down everything the line touches.
-	/// A plain class (the Player HAS a SlashSkill), driven by Player.Update through <see cref="Tick"/>.
-	/// </summary>
+
 	public class SlashSkill : IDisposable
 	{
 		public const int Parts = 3;
 
-		// numbers read from Akane's Player component: 0.1 per hit + up to 20 combo x 0.0035, slow-motion 0.7 for 6 x 0.7 seconds;
-		// the part being filled leaks away (0.07 per second) but never below the last full part, so full parts are kept
+
 		private const float GainPerHit = 0.15f;
 		private const float GainPerComboStep = 0.0035f;
 		private const int MaxComboBonus = 20;
@@ -26,8 +20,8 @@ namespace MyArcade
 		private const float MinRange = 2.5f;
 		private const float SlashRadius = 1.0f;        // half the width of the cut
 		private const int GiantDamage = 6;
-		private const float DrainPerSecond = 0.07f;  // Akane: the part being filled leaks away while you are not fighting
-		private const float UltDrainPerSecond = 0.85f; // Akane ultAdrenalineDecreasseSpeed: the full bar lasts about 3.5 s
+		private const float DrainPerSecond = 0.07f;
+		private const float UltDrainPerSecond = 0.85f;
 
 		private readonly Player owner;
 		private readonly LineRenderer zoneLine;        // wide, faint: where the cut will land
@@ -50,7 +44,7 @@ namespace MyArcade
 		private readonly List<Enemy> ultHit = new List<Enemy>();    // rivals struck so far: they all fall when it ends
 		private readonly List<LineRenderer> ultLines = new List<LineRenderer>();
 
-		/// <summary>While time is slowed the hero still walks at normal speed (Akane does the same).</summary>
+
 		public float MoveBoost => IsAiming ? Mathf.Min(1f / Mathf.Max(Time.timeScale, 0.05f), 8f) : 1f;
 
 		public SlashSkill(Player owner)
@@ -136,7 +130,7 @@ namespace MyArcade
 
 			if (input.DashPressed && Points >= Parts - 0.001f)
 			{
-				BeginUltimate(); // Akane's Slayer: with a full bar, right click starts the ultimate instead of a single slash
+				BeginUltimate();
 			}
 			else if (input.SpecialPressed || Time.unscaledTime >= aimEndsAt)
 			{
@@ -177,7 +171,7 @@ namespace MyArcade
 			target = Arena.Clamp(from + Vector3.ClampMagnitude(delta, MaxRange));
 		}
 
-		// ---- the ultimate (Akane Player.UltimateAction / UltimateHit / EndingUltimate) -----------------------
+
 
 		private void BeginUltimate()
 		{
@@ -300,7 +294,7 @@ namespace MyArcade
 			float distance = direction.magnitude;
 			direction = distance > 0.01f ? direction / distance : owner.transform.forward;
 
-			// everything the thick line passes through (SphereCast = Akane's BoxCast)
+
 			var victims = new List<Enemy>();
 			foreach (RaycastHit hit in Physics.SphereCastAll(from + Vector3.up * 0.8f, SlashRadius, direction, distance))
 			{
@@ -313,7 +307,7 @@ namespace MyArcade
 
 			owner.GrantInvulnerability(1.2f);
 			owner.RestoreStamina();
-			Enemy.Frozen = true; // Akane freezes everything for the length of the slash
+			Enemy.Frozen = true;
 			SlowMotion.Pulse(0.05f, 0.22f); // the freeze before the cut lands
 			owner.transform.position = to;
 			owner.transform.forward = direction;

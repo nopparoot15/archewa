@@ -40,7 +40,7 @@ namespace MyArcade
 		public int Kills { get; private set; }
 		public bool NewRecord { get; private set; }
 
-		// Akane's secondary scores (Score.cs): "boldness" for stylish play, and how many swings actually hit
+
 		public int Boldness { get; private set; }
 		public int BestBoldness { get; private set; }
 		public int BestMaxCombo { get; private set; }
@@ -69,8 +69,7 @@ namespace MyArcade
 			GameEvents.PlayerHealthChanged += OnHealth;
 			GameEvents.PlayerDied += OnPlayerDied;
 			GameEvents.WeaponChanged += slot => WeaponSlot = slot;
-			// boldness points from Main Stage: dodging a shot 30, sending a bullet back 30, killing a special rival 25,
-			// a gun hit 1, a dragon slash 10, 3 for each rival the ultimate finishes
+
 			GameEvents.BulletDodged += () => AddBoldness(30);
 			GameEvents.Deflected += _ => AddBoldness(30);
 			GameEvents.BulletHitEnemy += () => AddBoldness(1);
@@ -102,7 +101,7 @@ namespace MyArcade
 			Kills++;
 			if (enemy is Assassin || enemy is Brute)
 			{
-				AddBoldness(25); // Akane: killingSpecialEnemies (the big seniors and the assassins)
+				AddBoldness(25);
 			}
 			SetCombo(Combo + 1);
 			BestCombo = Mathf.Max(BestCombo, Combo);

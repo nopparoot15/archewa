@@ -20,10 +20,7 @@ namespace MyArcade
 		void TakeDamage(int amount, GameObject source);
 	}
 
-	/// <summary>
-	/// Something that can answer a bullet before it hurts (Akane's Character.TakeShot): the hero's parry sends it back.
-	/// Returns true when the bullet was dealt with (deflected or ignored); false = apply the normal damage.
-	/// </summary>
+
 	public interface IShootable
 	{
 		bool TakeShot(Bullet bullet);
@@ -92,10 +89,7 @@ namespace MyArcade
 		bool TryActivate(Player user, Vector3 aimDirection);
 	}
 
-	/// <summary>
-	/// Something that can knock a flying projectile back at its sender (the pipe and fists do this).
-	/// Same idea as the katana deflect in Akane, written for a street brawl.
-	/// </summary>
+
 	public interface IBulletDeflector
 	{
 		/// <summary>Returns true if the bullet was sent back.</summary>

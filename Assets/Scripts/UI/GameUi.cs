@@ -4,13 +4,7 @@ using UnityEngine.UI;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// All on-screen UI, laid out like Akane: a few hologram frames (highscore top left, kills top centre, combo at the right, gun and
-	/// ammo bottom right), slanted italic numbers, no health bar (one hit and you are down), a thin cooldown line
-	/// under the hero, a left-aligned title menu and a table on the game-over screen.
-	/// The objects live in the Hierarchy (edited by hand in the scene); this class only READS from GameManager/Player
-	/// and updates them.
-	/// </summary>
+
 	public class GameUi : MonoBehaviour
 	{
 		private static readonly Color Cyan = new Color(0.35f, 0.95f, 1f);
@@ -138,7 +132,7 @@ namespace MyArcade
 			{
 				return;
 			}
-			float ready = player.Stamina; // Akane draws the stamina bar under the hero
+			float ready = player.Stamina;
 			cooldownLine.gameObject.SetActive(ready < 0.999f && !player.IsDead);
 			if (ready >= 0.999f)
 			{

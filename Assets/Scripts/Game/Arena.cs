@@ -20,10 +20,7 @@ namespace MyArcade
 			return Mathf.Abs(position.x) > HalfSize + margin || Mathf.Abs(position.z) > HalfSize + margin;
 		}
 
-		/// <summary>
-		/// A border point the camera cannot see right now, so rivals walk into the picture instead of popping up in it
-		/// (Akane spawns them off screen). Falls back to any border point when the whole border is visible.
-		/// </summary>
+
 		public static Vector3 RandomHiddenEdgePoint()
 		{
 			Camera cam = Camera.main;

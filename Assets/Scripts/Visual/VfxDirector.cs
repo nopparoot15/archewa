@@ -3,12 +3,7 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// All the hit effects: sparks, cartoon impact stars, dust puffs, knock-out smoke, deflect flash
-	/// and the swing arc of a punch or pipe. Nothing here knows about enemies or weapons: it only listens to
-	/// GameEvents (Observer) and draws. Effects are particle systems built in code and reused (pooled).
-	/// The look is imitated from Akane's hit sparks / blood-splash / slash style, redrawn in 3D for this street.
-	/// </summary>
+
 	public class VfxDirector : MonoBehaviour
 	{
 		private const int PoolSize = 10;
@@ -110,7 +105,7 @@ namespace MyArcade
 			Emit(Kind.Star, p, enemy is Boss ? 10 : 4);
 		}
 
-		/// <summary>Once the fall animation is over the body stays lying on the street (Akane never clears them).</summary>
+
 		private System.Collections.IEnumerator LeaveCorpse(Enemy enemy)
 		{
 			yield return new WaitForSeconds(0.95f);
@@ -157,7 +152,7 @@ namespace MyArcade
 			body.gameObject.SetActive(true);
 		}
 
-		// ---- blood on the floor: stays for the whole fight (Akane leaves every splash and body on the street) ----
+
 
 		private void BuildBlood()
 		{

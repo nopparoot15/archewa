@@ -2,11 +2,7 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// The "looks" of a Character: a 2D sprite that always faces the camera (like Akane), and the hit flash.
-	/// It only LISTENS to the character (events + Speed01); game logic never touches this class.
-	/// The sprite is a real child object (visible in the Hierarchy, saved in the scene).
-	/// </summary>
+
 	public class CharacterView : MonoBehaviour
 	{
 		private static readonly Color NightTint = new Color(0.92f, 0.94f, 1f);
@@ -215,7 +211,7 @@ namespace MyArcade
 			return line;
 		}
 
-		/// <summary>Akane-style red laser of a Shooter: shows where the shot will go, so the hero can dodge it.</summary>
+
 		private void UpdateLaser()
 		{
 			if (laser == null)
@@ -377,7 +373,7 @@ namespace MyArcade
 					|| (oneShot == "slash_ready_side" && owner is Player aimer && aimer.Slash != null && aimer.Slash.IsAiming);
 				if (holdGuard)
 				{
-					clipTime = info.Frames - 0.01f; // the guard pose stays up as long as the parry stance lasts (Akane's Parrying bool)
+					clipTime = info.Frames - 0.01f;
 				}
 				else if (clipTime >= info.Frames && !owner.IsDead)
 				{

@@ -383,7 +383,7 @@ namespace MyArcade
 		public int BaseWeight;      // spawn weight once unlocked
 		public int WeightPerTier;   // extra weight for every 100 kills
 		public bool InCrowd = true; // false = never picked by the random crowd (the Boss is spawned on purpose)
-		public bool IsSpecial;      // Akane's split: regular rivals fill the crowd, special ones come on their own slower timer
+		public bool IsSpecial;
 	}
 
 	/// <summary>
