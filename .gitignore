@@ -40,3 +40,6 @@ Thumbs.db
 /Assets/Plugins/NuGet.meta
 /Packages/extensions.unity.playerprefsex/
 /Screenshots/city-facade-source.png
+
+# nix-shell
+shell.nix
