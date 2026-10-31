@@ -1,0 +1,117 @@
+{
+  "id": "player_gun_v6",
+  "clips": [
+    {
+      "name": "aim",
+      "direction": "front",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "front",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "front_right",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "front_right",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "right",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "right",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "back_right",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "back_right",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "back",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "back",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "back_left",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "back_left",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "left",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "left",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    },
+    {
+      "name": "aim",
+      "direction": "front_left",
+      "count": 1,
+      "fps": 6,
+      "loop": true
+    },
+    {
+      "name": "shoot",
+      "direction": "front_left",
+      "count": 4,
+      "fps": 24,
+      "loop": false
+    }
+  ]
+}

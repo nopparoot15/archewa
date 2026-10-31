@@ -8,10 +8,11 @@ namespace MyArcade
 	{
 
 		private const float UnitsPerPixel = 8.32f / 180f;
-		private const float OrthoSize = 180f * UnitsPerPixel;
-		private const float Pitch = 60f;
+		private const float Pitch = 30f;
+		private const float GameplayFov = 44f;
+		private static readonly Vector3 TitleOffset = new Vector3(0f, 7f, -16f);
 		private const float FollowSpeed = 3f;
-		private const float Distance = 40f;
+		private const float Distance = 25f;
 		private const float AimSight = 125f * UnitsPerPixel;
 
 		public static CameraRig Instance { get; private set; }
@@ -36,10 +37,10 @@ namespace MyArcade
 		public void SetTitleMode(bool on)
 		{
 			titleMode = on;
-			if (cam != null && !on)
+			if (cam != null)
 			{
-				cam.orthographic = true;
-				cam.orthographicSize = OrthoSize;
+				cam.orthographic = false;
+				cam.fieldOfView = on ? 42f : GameplayFov;
 				cam.nearClipPlane = 0.3f;
 				cam.farClipPlane = 260f;
 			}
@@ -90,8 +91,9 @@ namespace MyArcade
 			{
 				orbitAngle += Time.deltaTime * 6f;
 				Quaternion orbitRotation = Quaternion.Euler(0f, orbitAngle, 0f);
-				Vector3 orbit = orbitRotation * new Vector3(0f, 7f, -16f);
-				float viewHalfWidth = new Vector3(0f, 5.5f, -16f).magnitude * Mathf.Tan(cam.fieldOfView * .5f * Mathf.Deg2Rad) * cam.aspect;
+				cam.orthographic = false;
+				Vector3 orbit = orbitRotation * TitleOffset;
+				float viewHalfWidth = (TitleOffset - Vector3.up * 1.5f).magnitude * Mathf.Tan(cam.fieldOfView * .5f * Mathf.Deg2Rad) * cam.aspect;
 				Vector3 framing = -(orbitRotation * Vector3.right) * ((titleSubjectScreenX - .5f) * 2f * viewHalfWidth);
 				Vector3 desired = target.position + framing + orbit;
 				cam.transform.position = Vector3.Lerp(cam.transform.position, desired, 1f - Mathf.Exp(-6f * Time.deltaTime));
@@ -99,18 +101,16 @@ namespace MyArcade
 				return;
 			}
 
-			cam.orthographic = true;
-			cam.orthographicSize = OrthoSize;
+			cam.orthographic = false;
+			cam.fieldOfView = GameplayFov;
 
-			// follow like GameCamera.Update: Lerp toward the hero (plus the lean), in real time so slow-motion does not slow the camera
+			// Follow the player and aim offset in real time, including during slow motion.
 			Vector3 goal = new Vector3(target.position.x, 0f, target.position.z) + sightOffset;
 			focus = Vector3.Lerp(focus, goal, Mathf.Clamp01(Time.unscaledDeltaTime * FollowSpeed));
 
-			// clamp to the street: the view never shows more than a small margin outside it
-			float halfWidth = OrthoSize * cam.aspect;
-			float halfDepth = OrthoSize / Mathf.Sin(Pitch * Mathf.Deg2Rad);
-			float limitX = Mathf.Max(0f, Arena.HalfSize + 3f - halfWidth);
-			float limitZ = Mathf.Max(0f, Arena.HalfSize + 3f - halfDepth);
+			// Keep the player readable near the street edges while showing the surrounding shops.
+			float limitX = 8f;
+			float limitZ = 10f;
 			focus.x = Mathf.Clamp(focus.x, -limitX, limitX);
 			focus.z = Mathf.Clamp(focus.z, -limitZ, limitZ);
 

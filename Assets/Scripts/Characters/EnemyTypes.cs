@@ -9,7 +9,7 @@ namespace MyArcade
 		protected int contactDamage = 1;
 		protected float contactCooldown = 1.0f;
 		protected string displayName = "MECHANIC";
-		protected float windupTime = 0.4f;
+		protected float windupTime = 0.48f;
 		private const float AttackTokenSeconds = 0.35f;
 		private static float attackTokenFreeAt;
 
@@ -170,8 +170,8 @@ namespace MyArcade
 		// protected: Sniper and Shotgunner change these numbers (and Fire) instead of rewriting the whole class
 		protected float preferredDistance = 8f;
 
-		protected float aimTime = 1.3f;       // the red laser follows the hero this long (dash or parry as the shots come)
-		protected float lockTime = 0.12f;    // the direction is frozen this long before every shot
+		protected float aimTime = 1.5f;       // the red laser follows the hero this long (dash or parry as the shots come)
+		protected float lockTime = 0.16f;    // the direction is frozen this long before every shot
 		protected float shotGap = 0.3f;
 		protected int shotsPerBurst = 2;
 		protected float cooldown = 5f;

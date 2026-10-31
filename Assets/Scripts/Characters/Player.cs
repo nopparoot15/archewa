@@ -119,11 +119,14 @@ namespace MyArcade
 			}
 
 			// the fighter faces the mouse (and swings toward it); while dashing it faces the dash
+			Vector3 gunTarget = IsAiming && input != null
+				? GunAim.Point(Camera.main, input.PointerScreenPosition, transform.position + aim)
+				: transform.position + aim;
 			Vector3 face = IsDashing ? dashDirection : aim != Vector3.zero ? aim : LastMoveDirection;
 			if (IsAiming && !IsDashing)
 			{
 
-				Vector3 toMouse = PointerOnGround(transform.position) - transform.position;
+				Vector3 toMouse = gunTarget - transform.position;
 				toMouse.y = 0f;
 				if (toMouse.sqrMagnitude > 0.04f)
 				{
@@ -169,7 +172,7 @@ namespace MyArcade
 			if (IsAiming && input.AttackHeld && !IsDashing)
 			{
 
-				Vector3 gunAim = PointerOnGround(transform.position + aim) - transform.position;
+				Vector3 gunAim = gunTarget - transform.position;
 				gunAim.y = 0f;
 				gunAim = gunAim.sqrMagnitude > 0.04f ? gunAim.normalized : aim;
 				if (Time.time >= nextShotTime)

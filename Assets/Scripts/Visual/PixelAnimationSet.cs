@@ -28,8 +28,17 @@ namespace MyArcade
 
         public static PixelAnimationSet Load(string id)
         {
+            return LoadFolder(id, Folder(id));
+        }
+
+        public static PixelAnimationSet LoadGun()
+        {
+            return LoadFolder("player_gun_v6", "Sprites/player_gun_v6/");
+        }
+
+        private static PixelAnimationSet LoadFolder(string id, string root)
+        {
             if (Loaded.TryGetValue(id, out var existing)) return existing;
-            string root = Folder(id);
             if (Resources.Load<TextAsset>(root + "ready") == null) return null;
             var data = Resources.Load<TextAsset>(root + "manifest");
             if (data == null) return null;

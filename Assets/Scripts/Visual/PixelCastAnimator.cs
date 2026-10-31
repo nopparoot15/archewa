@@ -10,6 +10,7 @@ namespace MyArcade
         private Character owner;
         private Player player;
         private PixelAnimationSet set;
+        private PixelAnimationSet gunSet;
         private SpriteRenderer visual;
         private SpriteRenderer legs;
         private Transform model;
@@ -40,6 +41,7 @@ namespace MyArcade
             foreach (var part in root.GetComponentsInChildren<SpriteRenderer>()) if (part != renderer) part.enabled = false;
             if (player != null)
             {
+                gunSet = PixelAnimationSet.LoadGun();
                 playerRun = GetComponent<PlayerLegLayer>() ?? gameObject.AddComponent<PlayerLegLayer>();
                 playerRun.Initialize(player);
                 player.Shot += OnShot;
@@ -71,6 +73,26 @@ namespace MyArcade
             flip = side < 0f;
         }
 
+        private static string GunFacing(Vector3 forward)
+        {
+            var cam = Camera.main;
+            Vector3 right = cam != null ? cam.transform.right : Vector3.right;
+            Vector3 ahead = cam != null ? Vector3.ProjectOnPlane(cam.transform.forward, Vector3.up).normalized : Vector3.forward;
+            float angle = Mathf.Atan2(Vector3.Dot(forward, right), -Vector3.Dot(forward, ahead)) * Mathf.Rad2Deg;
+            int sector = ((Mathf.RoundToInt(angle / 45f) % 8) + 8) % 8;
+            switch (sector)
+            {
+                case 1: return "front_right";
+                case 2: return "right";
+                case 3: return "back_right";
+                case 4: return "back";
+                case 5: return "back_left";
+                case 6: return "left";
+                case 7: return "front_left";
+                default: return "front";
+            }
+        }
+
         private void Update()
         {
             if (owner == null || set == null || visual == null) return;
@@ -97,7 +119,12 @@ namespace MyArcade
                 else if (slash != null && slash.IsAiming) { loop = "slash_ready"; hold = 3; }
                 else if (player.IsDashing) loop = "dash";
                 else if (player.IsParrying) { loop = "guard"; hold = 3; }
-                else if (player.IsAiming) { loop = "shoot"; hold = 2; }
+                else if (player.IsAiming)
+                {
+                    loop = gunSet != null ? "aim" : "shoot";
+                    hold = gunSet != null ? -1 : 2;
+                    if (gunSet != null) { direction = GunFacing(transform.forward); flip = false; }
+                }
             }
             string cue = owner is Enemy enemy ? enemy.VisualPose : null;
             if (cue != null)
@@ -108,20 +135,27 @@ namespace MyArcade
             if (owner.IsDead && action != "die") Play("die");
             if (loop != previousLoop) { previousLoop = loop; loopTime = 0; }
             loopTime += dt;
-            var clip = set.Resolve(loop, direction);
+            var clipSet = loop == "aim" && gunSet != null ? gunSet : set;
+            var clip = clipSet.Resolve(loop, direction);
             int index = clip != null ? (int)(loopTime * clip.fps) : 0;
             if (clip != null) index = hold >= 0 ? Mathf.Min(index, hold) : clip.loop ? index % clip.count : Mathf.Min(index, clip.count - 1);
             if (loop == "run" && clip != null) index = (int)runPhase % clip.count;
             bool actionActive = false;
             if (action != null)
             {
-                var chosen = set.Resolve(action, actionDirection);
+                var actionSet = action == "shoot" && gunSet != null ? gunSet : set;
+                if (action == "shoot" && gunSet != null)
+                {
+                    actionDirection = GunFacing(transform.forward);
+                    actionFlip = false;
+                }
+                var chosen = actionSet.Resolve(action, actionDirection);
                 actionTime += dt;
                 int f = chosen != null ? (int)(actionTime * chosen.fps) : 0;
                 if (chosen == null || (f >= chosen.count && action != "die")) action = null;
                 else if (cue == null || action == "die" || action == "hurt" || (cue == "shoot" && action == "special"))
                 {
-                    clip = chosen; index = Mathf.Min(f, chosen.count - 1);
+                    clip = chosen; clipSet = actionSet; index = Mathf.Min(f, chosen.count - 1);
                     direction = actionDirection; flip = actionFlip; actionActive = true;
                 }
             }
@@ -138,7 +172,8 @@ namespace MyArcade
             if (legs != null) legs.enabled = false;
             bool canLayer = player != null && !owner.IsDead && !player.IsDashing &&
                 (player.Slash == null || (!player.Slash.IsAiming && !player.Slash.IsSlashing)) &&
-                (clip.name == "run" || clip.name == "attack" || clip.name == "guard" || clip.name == "shoot");
+                (clip.name == "run" || clip.name == "attack" || clip.name == "guard" ||
+                 ((clip.name == "aim" || clip.name == "shoot") && owner.Speed01 > .12f));
             if (canLayer && playerRun != null && legs != null)
             {
                 Vector3 move = player.LastMoveDirection != Vector3.zero ? player.LastMoveDirection : transform.forward;
@@ -146,7 +181,7 @@ namespace MyArcade
                 var legView = legDirection == "back" ? SpriteLibrary.View.Back : legDirection == "front" ? SpriteLibrary.View.Front : SpriteLibrary.View.Right;
                 if (playerRun.TryGet(legView, out Sprite lower))
                 {
-                    Sprite top = clip.name == "run" && !actionActive ? playerRun.Upper(legView) : Upper(set.Frame(clip, index));
+                    Sprite top = clip.name == "run" && !actionActive ? playerRun.Upper(legView) : Upper(clipSet.Frame(clip, index));
                     if (top != null)
                     {
                         visual.sprite = top;
@@ -157,7 +192,7 @@ namespace MyArcade
             }
             if (legs == null || !legs.enabled)
             {
-                var sprite = set.Frame(clip, index);
+                var sprite = clipSet.Frame(clip, index);
                 if (sprite != null) visual.sprite = sprite;
                 visual.flipX = clip.direction == "right" && flip;
             }
@@ -201,7 +236,7 @@ namespace MyArcade
                 Play(player.Slash.IsUlting ? "ult_strike" : "slash_cut");
             else Play("attack");
         }
-        private void OnShot() { Play("shoot"); actionTime = 3f / 32f; }
+        private void OnShot() { Play("shoot"); actionTime = gunSet != null ? 0f : 3f / 32f; }
         private void OnDamage() { flashUntil = Time.time + .12f; if (!owner.IsDead) Play("hurt"); }
         private void OnDeath() { Play("die"); }
         private void OnDestroy()

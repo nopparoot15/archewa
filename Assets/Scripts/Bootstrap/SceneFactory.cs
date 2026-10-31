@@ -74,18 +74,12 @@ namespace MyArcade
 
 		public static Bullet CreateBullet(Transform parent)
 		{
-			GameObject go = GameObject.CreatePrimitive(PrimitiveType.Sphere);
-			go.name = "Stone";
-			go.transform.SetParent(parent, false);
-			go.transform.localScale = Vector3.one * 0.28f;
-			go.GetComponent<SphereCollider>().isTrigger = true;
-			var body = go.AddComponent<Rigidbody>();
-			body.isKinematic = true;
-			body.useGravity = false;
-			go.GetComponent<Renderer>().sharedMaterial = MakeGlowMaterial(new Color(1f, 0.55f, 0.15f), 1.2f);
-			Bullet bullet = go.AddComponent<Bullet>();
+			GameObject prefab = Resources.Load<GameObject>("Projectiles/StreetBullet");
+			if (prefab == null)
+				throw new System.InvalidOperationException("StreetBullet projectile prefab is missing.");
+			GameObject go = Object.Instantiate(prefab, parent);
 			go.SetActive(false);
-			return bullet;
+			return go.GetComponent<Bullet>();
 		}
 
 		public static Enemy CreateEnemy(EnemyType type, Transform parent)

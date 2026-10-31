@@ -18,6 +18,13 @@ namespace MyArcade
 		private bool dodgeCounted;
 		private static Player hero;
 		private Action<Bullet> release;
+		private BulletVisual visual;
+		private static int syncedFrame = -1;
+
+		private void Awake()
+		{
+			visual = GetComponent<BulletVisual>();
+		}
 
 		public Team Team => team;
 		public Vector3 Direction => transform.forward;
@@ -40,6 +47,17 @@ namespace MyArcade
 			lastDeflector = null;
 			dodgeCounted = false;
 			spawnTime = Time.time;
+			visual?.SetTeam(team);
+			Physics.SyncTransforms();
+			Vector3 origin = transform.position;
+			if (owner != null && owner.GetComponent<Character>() != null)
+			{
+				origin = owner.transform.position;
+				origin.y = transform.position.y;
+			}
+			Vector3 muzzleTravel = transform.position - origin;
+			TryHitAlong(origin, muzzleTravel.sqrMagnitude > 0.0001f ? muzzleTravel.normalized : direction,
+				muzzleTravel.magnitude);
 		}
 
 
@@ -50,16 +68,19 @@ namespace MyArcade
 			owner = newOwner;
 			damage = newDamage;
 			spawnTime = Time.time;
+			visual?.SetTeam(team);
 		}
 
 		public void OnSpawn()
 		{
 			spawnTime = Time.time;
+			visual?.ClearTrail();
 		}
 
 		public void OnDespawn()
 		{
 			owner = null;
+			visual?.ClearTrail();
 		}
 
 
@@ -87,46 +108,65 @@ namespace MyArcade
 			}
 		}
 
-		private void Update()
+		private void LateUpdate()
 		{
 			if (Enemy.Frozen)
 			{
 				spawnTime += Time.deltaTime; // a frozen bullet does not age
 				return;
 			}
-			float distance = speed * Time.deltaTime;
-			RaycastHit[] hits = Physics.SphereCastAll(transform.position, Radius, transform.forward, distance, ~0, QueryTriggerInteraction.Ignore);
-			Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
-			foreach (RaycastHit hit in hits)
+			if (syncedFrame != Time.frameCount)
 			{
-				IDamageable target = hit.collider.GetComponentInParent<IDamageable>();
-				if (target == null || target.IsDead || target.Team == team)
-				{
-					continue;
-				}
-				if (target is IShootable shootable && shootable.TakeShot(this))
-				{
-					transform.position = hit.point; // deflected or ignored: the bullet carries on
-					return;
-				}
-				target.TakeDamage(damage, owner);
-				CameraRig.Shake(1f, 0.08f, 0.015f);
-				if (team == Team.Player && target is Enemy)
-				{
-					GameEvents.RaiseBulletHitEnemy();
-				}
-				GameEvents.RaiseHitLanded(hit.point, damage);
-				GameEvents.RaiseSound("hit");
-				release(this);
-				return;
+				Physics.SyncTransforms();
+				syncedFrame = Time.frameCount;
 			}
+			Travel(speed * Time.deltaTime);
+		}
 
+		private void Travel(float distance)
+		{
+			if (TryHitAlong(transform.position, transform.forward, distance)) return;
 			CheckDodge(distance);
 			transform.position += transform.forward * distance;
-			if (Time.time - spawnTime > Lifetime || Arena.IsOutside(transform.position))
+			if (Time.time - spawnTime > Lifetime || Arena.IsOutside(transform.position)) release(this);
+		}
+
+		private bool TryHitAlong(Vector3 origin, Vector3 direction, float distance)
+		{
+			Collider[] overlaps = Physics.OverlapSphere(origin, Radius, ~0, QueryTriggerInteraction.Ignore);
+			Array.Sort(overlaps, (a, b) => a.bounds.SqrDistance(origin).CompareTo(b.bounds.SqrDistance(origin)));
+			foreach (Collider overlap in overlaps)
+				if (ResolveHit(overlap, overlap.ClosestPoint(origin))) return true;
+			if (distance <= 0f) return false;
+			RaycastHit[] hits = Physics.SphereCastAll(origin, Radius, direction, distance, ~0, QueryTriggerInteraction.Ignore);
+			Array.Sort(hits, (a, b) => a.distance.CompareTo(b.distance));
+			foreach (RaycastHit hit in hits)
+				if (ResolveHit(hit.collider, hit.point)) return true;
+			return false;
+		}
+
+		private bool ResolveHit(Collider collider, Vector3 point)
+		{
+			IDamageable target = collider.GetComponentInParent<IDamageable>();
+			if (target == null || target.IsDead || target.Team == team)
 			{
-				release(this);
+				return false;
 			}
+			if (target is IShootable shootable && shootable.TakeShot(this))
+			{
+				transform.position = point;
+				return true;
+			}
+			target.TakeDamage(damage, owner);
+			CameraRig.Shake(1f, 0.08f, 0.015f);
+			if (team == Team.Player && target is Enemy)
+			{
+				GameEvents.RaiseBulletHitEnemy();
+			}
+			GameEvents.RaiseHitLanded(point, damage);
+			GameEvents.RaiseSound("hit");
+			release(this);
+			return true;
 		}
 	}
 }
