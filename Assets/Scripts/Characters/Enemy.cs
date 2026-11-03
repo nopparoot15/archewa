@@ -21,10 +21,6 @@ namespace MyArcade
 		Charger
 	}
 
-	/// <summary>
-	/// Base of all rival students. The shared life cycle (find the player, die, give score, return to the pool)
-	/// is written once here. Each subclass only decides how it BEHAVES (abstract method).
-	/// </summary>
 	public abstract class Enemy : Character, IPoolable
 	{
 		private static readonly System.Collections.Generic.List<Enemy> Active = new System.Collections.Generic.List<Enemy>();
@@ -39,10 +35,8 @@ namespace MyArcade
 		private float baseSpeed;
 
 		public override Team Team => Team.Enemy;
-		public EnemyType Kind { get; set; }
-		/// <summary>Optional animation cue. Subclasses expose their state without the renderer depending on concrete AI classes.</summary>
+		[field: SerializeField] public EnemyType Kind { get; set; }
 		public virtual string VisualPose => null;
-
 
 		public static bool Frozen { get; set; }
 
@@ -58,7 +52,6 @@ namespace MyArcade
 			ResetHealth();
 		}
 
-		/// <summary>A Commander's shout: faster for a few seconds, then back to normal.</summary>
 		public void ApplyBuff(float speedMultiplier, float seconds)
 		{
 			if (buffUntil <= 0f)
@@ -84,7 +77,6 @@ namespace MyArcade
 		{
 		}
 
-		/// <summary>Sends every living rival back to its pool without counting a kill (used before a boss fight).</summary>
 		public static void RetireAll()
 		{
 			var copy = new System.Collections.Generic.List<Enemy>(Active);
@@ -109,7 +101,6 @@ namespace MyArcade
 
 		protected virtual bool IsGiant => false;
 
-		/// <summary>Round difficulty: tougher and faster rivals as the rounds go on.</summary>
 		public void ApplyLevel(float healthScale, float speedScale)
 		{
 			if (!baseCaptured)
@@ -123,7 +114,6 @@ namespace MyArcade
 			ResetHealth();
 		}
 
-		/// <summary>Keeps the crowd from stacking into one pile: each rival gently pushes away from close neighbours.</summary>
 		private void Separate()
 		{
 			Vector3 push = Vector3.zero;
@@ -158,7 +148,6 @@ namespace MyArcade
 			return enemy.target != null ? (enemy.target.transform.position - enemy.transform.position).sqrMagnitude : 0f;
 		}
 
-
 		protected virtual void OnBlockedByCloser()
 		{
 		}
@@ -183,7 +172,6 @@ namespace MyArcade
 			FinishFrame();
 		}
 
-		/// <summary>What this enemy does every frame. Every subclass must answer this.</summary>
 		protected abstract void Behave();
 
 		protected Vector3 DirectionToTarget()
@@ -198,6 +186,23 @@ namespace MyArcade
 			Vector3 delta = target.transform.position - transform.position;
 			delta.y = 0f;
 			return delta.magnitude;
+		}
+
+		protected Vector3 strikeDirection;
+
+		// the swing goes where the enemy looked when it started winding up
+		protected void LockStrike()
+		{
+			strikeDirection = DirectionToTarget();
+			if (strikeDirection != Vector3.zero)
+			{
+				transform.forward = strikeDirection;
+			}
+		}
+
+		protected bool StrikeReaches(float range)
+		{
+			return DistanceToTarget() <= range && Vector3.Angle(strikeDirection, DirectionToTarget()) <= 55f;
 		}
 
 		protected void FaceTarget()

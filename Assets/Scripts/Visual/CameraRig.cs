@@ -3,10 +3,8 @@ using UnityEngine;
 
 namespace MyArcade
 {
-
 	public class CameraRig : MonoBehaviour
 	{
-
 		private const float UnitsPerPixel = 8.32f / 180f;
 		private const float Pitch = 30f;
 		private const float GameplayFov = 44f;
@@ -54,12 +52,10 @@ namespace MyArcade
 			}
 		}
 
-
 		public void LeanToward(Vector3 direction)
 		{
 			sightOffset = direction.sqrMagnitude > 0.001f ? direction.normalized * AimSight : Vector3.zero;
 		}
-
 
 		public static void Shake(float magnitude, float duration, float frequency = 0.05f)
 		{
@@ -113,7 +109,6 @@ namespace MyArcade
 			float limitZ = 10f;
 			focus.x = Mathf.Clamp(focus.x, -limitX, limitX);
 			focus.z = Mathf.Clamp(focus.z, -limitZ, limitZ);
-
 
 			focus += shakeKick;
 			shakeKick = Vector3.zero;

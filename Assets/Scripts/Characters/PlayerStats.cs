@@ -2,10 +2,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Tunable numbers. Weapons, abilities and the player READ these instead of having
-	/// fixed values, so new tuning never needs a change in the weapon classes (open/closed principle).
-	/// </summary>
 	public class PlayerStats
 	{
 		public int DamageBonus { get; set; }

@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Generic object pool (reuse instead of Instantiate/Destroy).
-	/// The pool does not know how to build a T: the creator is passed in (factory function).
-	/// </summary>
 	public class ObjectPool<T> where T : Component, IPoolable
 	{
 		private readonly Func<T> factory;

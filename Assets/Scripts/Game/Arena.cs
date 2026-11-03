@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>The playing field: a square on the XZ plane. Single place that knows its size.</summary>
 	public static class Arena
 	{
 		public const float HalfSize = 17f;
@@ -19,7 +18,6 @@ namespace MyArcade
 		{
 			return Mathf.Abs(position.x) > HalfSize + margin || Mathf.Abs(position.z) > HalfSize + margin;
 		}
-
 
 		public static Vector3 RandomHiddenEdgePoint()
 		{
@@ -42,7 +40,6 @@ namespace MyArcade
 			return point;
 		}
 
-		/// <summary>A random point on the border, used to spawn enemies.</summary>
 		public static Vector3 RandomEdgePoint()
 		{
 			float t = Random.Range(-HalfSize, HalfSize);

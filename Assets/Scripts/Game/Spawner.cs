@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Builds waves, creates enemies. One pool per enemy type; the Spawner does not care
-	/// which subclass it spawns, it only handles the base type Enemy.
-	/// </summary>
 	public class Spawner : MonoBehaviour
 	{
 		private const int BossEveryKills = 100;
@@ -29,7 +25,6 @@ namespace MyArcade
 		public static int BossesDefeated { get; private set; }
 		public static bool BossActive { get; private set; }
 
-		/// <summary>Endless mode: rivals stream in; every 100 kills the arena is cleared for a 1v1 with a boss.</summary>
 		public void Setup(Player player, IBulletSpawner bullets)
 		{
 			this.player = player;
@@ -64,7 +59,7 @@ namespace MyArcade
 				nextRegularAt = Time.time + 2.5f;
 				for (int i = 0; i < EnemiesAfterBoss; i++)
 				{
-					TrySpawnRegular(); // enemiesSpawnedAfterDead = 10
+					TrySpawnRegular();
 				}
 			}
 			else
@@ -100,7 +95,6 @@ namespace MyArcade
 				return;
 			}
 
-
 			if (Time.time >= nextRegularAt)
 			{
 				nextRegularAt = Time.time + Mathf.Lerp(6f, 3.5f, NormalKills / 150f);
@@ -119,7 +113,6 @@ namespace MyArcade
 			}
 		}
 
-
 		private int RegularLimit()
 		{
 			return Mathf.RoundToInt(Mathf.Lerp(3f, 24f, NormalKills / 150f)) + BossesDefeated * 3;
@@ -129,7 +122,6 @@ namespace MyArcade
 		{
 			return Mathf.Lerp(25f, 8f, kills / 500f);
 		}
-
 
 		private float RegularSpeedScale()
 		{
@@ -165,7 +157,6 @@ namespace MyArcade
 			alive++;
 		}
 
-		/// <summary>A Splitter fell: two Sprinters jump out of it.</summary>
 		private void OnEnemySplit(Vector3 at)
 		{
 			if (BossActive)
@@ -200,7 +191,7 @@ namespace MyArcade
 				ObjectPool<Enemy> created = null;
 				created = new ObjectPool<Enemy>(() =>
 				{
-					Enemy enemy = SceneFactory.CreateEnemy(type, transform);
+					Enemy enemy = EnemyFactory.CreateEnemy(type, transform);
 					enemy.Init(player, e => created.Release(e));
 					if (enemy is Shooter shooter)
 					{

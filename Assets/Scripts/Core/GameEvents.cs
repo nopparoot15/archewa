@@ -3,34 +3,30 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Observer pattern: classes announce what happened, others listen.
-	/// The enemy does not know the score board exists; the camera does not know who got hit.
-	/// </summary>
 	public static class GameEvents
 	{
 		public static event Action<Enemy> EnemyKilled;
 		public static event Action<int, int> PlayerHealthChanged; // current, max
 		public static event Action PlayerDied;
 		public static event Action<int> WaveStarted;
-		public static event Action<int> WeaponChanged;            // slot index
-		public static event Action<Vector3, int> HitLanded;       // where, damage (camera shake, sparks)
+		public static event Action<int> WeaponChanged; // slot index
+		public static event Action<Vector3, int> HitLanded; // where, damage (camera shake, sparks)
 		public static event Action<int> ComboChanged;
-		public static event Action<Enemy> BossChanged;             // boss appeared (or null when it is gone)
-		public static event Action<Vector3> BossCharging;          // boss warns before charging
-		public static event Action<string> SoundRequested;         // "hit", "deflect"...
-		public static event Action<Vector3> Deflected;             // a stone was hit back
+		public static event Action<Enemy> BossChanged; // boss appeared (or null when it is gone)
+		public static event Action<Vector3> BossCharging; // boss warns before charging
+		public static event Action<string> SoundRequested; // "hit", "deflect"...
+		public static event Action<Vector3> Deflected; // a stone was hit back
 		public static event Action<Vector3, Vector3, float, float> AttackSwung; // origin, direction, reach, arc (for the swing trail)
 		public static event Action<Vector3> DashStarted;
-		public static event Action BulletDodged;                    // an enemy bullet flew past the hero
-		public static event Action BulletHitEnemy;                  // one of the hero's bullets hit a rival
-		public static event Action<int> SlashLanded;                // the dragon slash cut this many rivals
-		public static event Action<int> UltimateKilled;             // the ultimate finished this many rivals
-		public static event Action SwingStarted;                    // the hero swung the pipe
-		public static event Action SwingConnected;                  // ...and that swing hit someone
-		public static event Action<Vector3, float> BombLit;         // a Bomber lit its fuse: where, blast radius
-		public static event Action<Vector3, float> Exploded;       // a Bomber blew up: where, blast radius
-		public static event Action<Vector3> EnemySplit;            // a Splitter died: the spawner adds its offspring
+		public static event Action BulletDodged; // an enemy bullet flew past the hero
+		public static event Action BulletHitEnemy; // one of the hero's bullets hit a rival
+		public static event Action<int> SlashLanded; // the dragon slash cut this many rivals
+		public static event Action<int> UltimateKilled; // the ultimate finished this many rivals
+		public static event Action SwingStarted; // the hero swung the pipe
+		public static event Action SwingConnected; // ...and that swing hit someone
+		public static event Action<Vector3, float> BombLit; // a Bomber lit its fuse: where, blast radius
+		public static event Action<Vector3, float> Exploded; // a Bomber blew up: where, blast radius
+		public static event Action<Vector3> EnemySplit; // a Splitter died: the spawner adds its offspring
 
 		public static void RaiseEnemyKilled(Enemy enemy) { EnemyKilled?.Invoke(enemy); }
 		public static void RaisePlayerHealthChanged(int current, int max) { PlayerHealthChanged?.Invoke(current, max); }
@@ -55,7 +51,6 @@ namespace MyArcade
 		public static void RaiseExploded(Vector3 position, float radius) { Exploded?.Invoke(position, radius); }
 		public static void RaiseEnemySplit(Vector3 position) { EnemySplit?.Invoke(position); }
 
-		/// <summary>Forget all listeners (called when the game is rebuilt after a restart).</summary>
 		public static void Clear()
 		{
 			EnemyKilled = null;

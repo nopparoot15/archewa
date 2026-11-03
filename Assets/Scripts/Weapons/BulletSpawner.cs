@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>Owns the stone pool and implements IBulletSpawner for every ranged weapon.</summary>
 	public class BulletSpawner : MonoBehaviour, IBulletSpawner
 	{
 		private ObjectPool<Bullet> pool;
@@ -11,7 +10,7 @@ namespace MyArcade
 		{
 			pool = new ObjectPool<Bullet>(() =>
 			{
-				Bullet bullet = SceneFactory.CreateBullet(transform);
+				Bullet bullet = EnemyFactory.CreateBullet(transform);
 				bullet.Init(b => pool.Release(b));
 				return bullet;
 			});

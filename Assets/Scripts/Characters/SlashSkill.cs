@@ -5,55 +5,53 @@ using UnityEngine;
 
 namespace MyArcade
 {
-
 	public class SlashSkill : IDisposable
 	{
 		public const int Parts = 3;
 
-
 		private const float GainPerHit = 0.15f;
 		private const float GainPerComboStep = 0.0035f;
 		private const int MaxComboBonus = 20;
-		private const float AimSeconds = 6f * 0.7f;    // real seconds you have to pick the line
+		private const float AimSeconds = 6f * 0.7f; // real seconds you have to pick the line
 		private const float AimTimeScale = 0.7f;
 		private const float MaxRange = 13f;
 		private const float MinRange = 2.5f;
-		private const float SlashRadius = 1.0f;        // half the width of the cut
+		private const float SlashRadius = 1.0f; // half the width of the cut
 		private const int GiantDamage = 6;
 		private const float DrainPerSecond = 0.07f;
 		private const float UltDrainPerSecond = 0.85f;
 
 		private readonly Player owner;
-		private readonly LineRenderer zoneLine;        // wide, faint: where the cut will land
-		private readonly LineRenderer aimLine;         // thin, bright: the path
-		private readonly LineRenderer reticle;         // circle at the end point
-		private readonly LineRenderer flashLine;       // the white streak left by the slash
+		private readonly LineRenderer zoneLine; // wide, faint: where the cut will land
+		private readonly LineRenderer aimLine; // thin, bright: the path
+		private readonly LineRenderer reticle; // circle at the end point
+		private readonly LineRenderer trailPrefab;
+		private readonly LineRenderer flashLine; // the white streak left by the slash
 		private int combo;
 		private float aimEndsAt;
 		private bool attackWasHeld;
 		private Vector3 target;
 
-		/// <summary>0..3: every whole number is one charged part.</summary>
 		public float Points { get; private set; }
-		private int checkpoint;   // whole parts already earned: the leak never goes below them
+		private int checkpoint; // whole parts already earned: the leak never goes below them
 		public bool IsAiming { get; private set; }
 		public bool IsSlashing { get; private set; }
 		public bool IsUlting { get; private set; }
 
-		private readonly List<Enemy> ultPool = new List<Enemy>();   // rivals on screen that may still be struck
-		private readonly List<Enemy> ultHit = new List<Enemy>();    // rivals struck so far: they all fall when it ends
+		private readonly List<Enemy> ultPool = new List<Enemy>(); // rivals on screen that may still be struck
+		private readonly List<Enemy> ultHit = new List<Enemy>(); // rivals struck so far: they all fall when it ends
 		private readonly List<LineRenderer> ultLines = new List<LineRenderer>();
-
 
 		public float MoveBoost => IsAiming ? Mathf.Min(1f / Mathf.Max(Time.timeScale, 0.05f), 8f) : 1f;
 
-		public SlashSkill(Player owner)
+		public SlashSkill(Player owner, LineRenderer zone, LineRenderer aim, LineRenderer reticleLine, LineRenderer flash, LineRenderer trail)
 		{
 			this.owner = owner;
-			zoneLine = MakeLine("SlashZone", new Color(0.4f, 0.9f, 1f, 0.16f), SlashRadius * 2f, 2);
-			aimLine = MakeLine("SlashAim", new Color(0.7f, 1f, 1f, 0.95f), 0.14f, 2);
-			reticle = MakeLine("SlashReticle", new Color(0.7f, 1f, 1f, 0.95f), 0.12f, 33);
-			flashLine = MakeLine("SlashFlash", Color.white, 0.7f, 2);
+			zoneLine = zone;
+			aimLine = aim;
+			reticle = reticleLine;
+			flashLine = flash;
+			trailPrefab = trail;
 			GameEvents.EnemyKilled += OnKill;
 			GameEvents.Deflected += OnDeflect;
 			GameEvents.ComboChanged += OnCombo;
@@ -64,13 +62,8 @@ namespace MyArcade
 			GameEvents.EnemyKilled -= OnKill;
 			GameEvents.Deflected -= OnDeflect;
 			GameEvents.ComboChanged -= OnCombo;
-			foreach (LineRenderer line in new[] { zoneLine, aimLine, reticle, flashLine })
-			{
-				if (line != null)
-				{
-					UnityEngine.Object.Destroy(line.gameObject);
-				}
-			}
+			SetAimVisible(false);
+			flashLine.enabled = false;
 		}
 
 		private void OnKill(Enemy enemy) { Gain(GainPerHit + Mathf.Min(combo, MaxComboBonus) * GainPerComboStep); }
@@ -87,7 +80,6 @@ namespace MyArcade
 			checkpoint = Mathf.Max(checkpoint, Mathf.FloorToInt(Points + 0.0001f));
 		}
 
-		/// <summary>Called every frame by the player. Handles the charge, the aiming mode and the click.</summary>
 		public void Tick(IInputSource input)
 		{
 			if (IsUlting)
@@ -171,8 +163,6 @@ namespace MyArcade
 			target = Arena.Clamp(from + Vector3.ClampMagnitude(delta, MaxRange));
 		}
 
-
-
 		private void BeginUltimate()
 		{
 			IsAiming = false;
@@ -219,7 +209,7 @@ namespace MyArcade
 				Enemy struck = ultPool[index];
 				ultPool.RemoveAt(index);
 				ultHit.Add(struck);
-				var line = MakeLine("UltTrail", new Color(1f, 1f, 1f, 0.9f), 0.35f, 2);
+				LineRenderer line = UnityEngine.Object.Instantiate(trailPrefab);
 				line.SetPosition(0, owner.transform.position + Vector3.up * 0.7f);
 				line.SetPosition(1, struck.transform.position + Vector3.up * 0.7f);
 				line.enabled = true;
@@ -294,7 +284,6 @@ namespace MyArcade
 			float distance = direction.magnitude;
 			direction = distance > 0.01f ? direction / distance : owner.transform.forward;
 
-
 			var victims = new List<Enemy>();
 			foreach (RaycastHit hit in Physics.SphereCastAll(from + Vector3.up * 0.8f, SlashRadius, direction, distance))
 			{
@@ -335,27 +324,6 @@ namespace MyArcade
 			}
 
 			IsSlashing = false;
-		}
-
-		// ---- drawing -----------------------------------------------------------------------
-
-		private static LineRenderer MakeLine(string name, Color color, float width, int points)
-		{
-			var go = new GameObject(name);
-			var line = go.AddComponent<LineRenderer>();
-			line.useWorldSpace = true;
-			line.positionCount = points;
-			line.widthMultiplier = width;
-			line.numCapVertices = 4;
-			line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-			line.receiveShadows = false;
-			var material = new Material(Shader.Find("Sprites/Default"));
-			material.color = Color.white; // the colour comes from the line's own vertex colours
-			line.sharedMaterial = material;
-			line.startColor = color;
-			line.endColor = color;
-			line.enabled = false;
-			return line;
 		}
 
 		private void SetAimVisible(bool visible)

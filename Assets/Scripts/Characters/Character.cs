@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Base class of everything that walks and has health (Player and every Enemy).
-	/// Shared behaviour lives here once; subclasses only add what is different.
-	/// It announces what happens through events, so the visuals (CharacterView)
-	/// can react WITHOUT the game logic knowing anything about models or animation.
-	/// </summary>
 	public abstract class Character : MonoBehaviour, IDamageable, IKnockbackable
 	{
 		// protected: subclasses may change their own stats, outside code may not (encapsulation)
@@ -22,14 +16,12 @@ namespace MyArcade
 		public int MaxHealth => maxHealth;
 		public bool IsDead => Health <= 0;
 
-		/// <summary>0 = standing, 1 = walking at full speed, above 1 = sprinting. Used by the animator.</summary>
 		public float Speed01 { get; private set; }
 
-		/// <summary>Each subclass says which team it fights for.</summary>
 		public abstract Team Team { get; }
 		public abstract string DisplayName { get; }
 
-		public event Action<string> Attacked;   // animation clip to play
+		public event Action<string> Attacked; // animation clip to play
 		public event Action Damaged;
 		public event Action Died;
 
@@ -38,7 +30,6 @@ namespace MyArcade
 			Health = maxHealth;
 		}
 
-		/// <summary>Called by pools when the object is reused: full health again.</summary>
 		protected void ResetHealth()
 		{
 			Health = maxHealth;
@@ -57,7 +48,6 @@ namespace MyArcade
 			lastMoveSpeed = direction.magnitude * speedMultiplier;
 		}
 
-		/// <summary>Call once per frame after Move/Idle: applies knockback and smooths the animation value.</summary>
 		protected void FinishFrame()
 		{
 			if (knockback.sqrMagnitude > 0.01f)
@@ -96,12 +86,10 @@ namespace MyArcade
 			Attacked?.Invoke(clip);
 		}
 
-		/// <summary>Optional hook for subclasses (invulnerability, sound...).</summary>
 		protected virtual void OnDamaged(GameObject source)
 		{
 		}
 
-		/// <summary>Every kind of character dies differently, so this is abstract.</summary>
 		protected abstract void Die();
 	}
 }

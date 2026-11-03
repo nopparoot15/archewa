@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-
 	public class Bullet : MonoBehaviour, IPoolable
 	{
 		private const float Lifetime = 1f;
@@ -60,7 +59,6 @@ namespace MyArcade
 				muzzleTravel.magnitude);
 		}
 
-
 		public void Reflect(Vector3 newDirection, Team newTeam, GameObject newOwner, int newDamage)
 		{
 			transform.forward = newDirection;
@@ -82,7 +80,6 @@ namespace MyArcade
 			owner = null;
 			visual?.ClearTrail();
 		}
-
 
 		private void CheckDodge(float distance)
 		{

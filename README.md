@@ -60,9 +60,8 @@ Dash ใช้เพื่อออกจากแนวโจมตี ต้�
 | --- | --- |
 | `Assets/Scenes/Main.unity` | ฉากหลัก เมือง ตัวละครเริ่มต้น กล้อง และ UI |
 | `Assets/Scripts/Characters` | ตัวละคร ศัตรู ความสามารถ และสกิล |
-| `Assets/Scripts/Game` | สถานะเกม คะแนน และระบบเกิดศัตรู |
+| `Assets/Scripts/Game` | สถานะเกม คะแนน ระบบเกิดศัตรู การเชื่อมส่วนประกอบ และ EnemyFactory |
 | `Assets/Scripts/Core` | Interfaces, Events และ Object Pool |
-| `Assets/Scripts/Bootstrap` | เชื่อมส่วนประกอบเกม และ Factory สำหรับตัวละคร |
 | `Assets/Scripts/UI` | HUD และการทำงานของเมนู |
 | `Assets/Scripts/Visual` | อนิเมชัน กล้อง และเอฟเฟกต์ |
 | `Screenshots` | ภาพจากเกม |

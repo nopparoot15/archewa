@@ -5,11 +5,6 @@ using UnityEngine.InputSystem;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Keyboard + mouse implementation of IInputSource: WASD move, mouse aim, hold left click to attack,
-	/// always running, Shift aims the pen gun (click shoots), right click dash, E parry, Space then click = special slash, keys 1-3 switch weapon, Esc/P pause, M mute, R restarts (menus: W/S or arrows, Enter/Space or click).
-	/// Works with the old and the new Unity input system.
-	/// </summary>
 	public class PlayerInput : IInputSource
 	{
 #if ENABLE_INPUT_SYSTEM

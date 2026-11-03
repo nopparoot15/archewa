@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-
 	public class DashAbility : IAbility
 	{
 		private const float Duration = 0.125f;
@@ -29,7 +28,6 @@ namespace MyArcade
 			return true;
 		}
 	}
-
 
 	public class ParryAbility : IAbility
 	{

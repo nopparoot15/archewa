@@ -5,11 +5,6 @@ using UnityEngine;
 
 namespace MyArcade.EditorTools
 {
-	/// <summary>
-	/// First-time setup, done automatically once when the project opens:
-	/// 1) imports the TextMeshPro "Essential Resources" (the UI needs them),
-	/// 2) builds the game scene into the Hierarchy (Assets/Scenes/Main.unity) if it does not exist yet.
-	/// </summary>
 	[InitializeOnLoad]
 	public static class TmpEssentials
 	{
@@ -44,11 +39,11 @@ namespace MyArcade.EditorTools
 			if (method != null)
 			{
 				method.Invoke(null, new object[] { true, false, false });
-				Debug.Log("MyArcade: imported TextMeshPro essential resources.");
+				Debug.Log("imported TextMeshPro essential resources.");
 			}
 			else
 			{
-				Debug.LogWarning("MyArcade: open Window > TextMeshPro > Import TMP Essential Resources once, then use MyArcade > Build Scene.");
+				Debug.LogWarning("open Window > TextMeshPro > Import TMP Essential Resources once.");
 			}
 		}
 	}

@@ -4,12 +4,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// The hero (a vocational-school student). Gets commands from an IInputSource, fights with
-	/// whichever Weapon it holds, owns a list of IAbility (dash, parry) and a PlayerStats object
-	/// that tune it.
-	/// It never reads the keyboard itself.
-	/// </summary>
 	public class Player : Character, IShootable
 	{
 		private const float HitInvulnerability = 0.9f;
@@ -22,14 +16,12 @@ namespace MyArcade
 		private float parryReadyAt;
 		private float attackDeflectUntil;
 
-
 		public const int MaxAmmo = 8;
 		private const float AmmoPerSecond = 8f / 30f;
 		private const float AmmoPerKill = 0.45f;
 		private const float ShotDelay = 0.2f;
 		private const float BulletSpeed = 92f;
 		private const int BulletDamage = 3;
-
 
 		private const float StaminaPerSwing = 0.07f;
 		private const float StaminaChargeDelay = 1f;
@@ -57,6 +49,11 @@ namespace MyArcade
 		public Weapon CurrentWeapon => weapons[currentWeapon];
 		public Weapon[] Weapons => weapons;
 		public IAbility[] Abilities => abilities;
+		[SerializeField] private LineRenderer slashZone;
+		[SerializeField] private LineRenderer slashAim;
+		[SerializeField] private LineRenderer slashReticle;
+		[SerializeField] private LineRenderer slashFlash;
+		[SerializeField] private LineRenderer ultTrail;
 		public SlashSkill Slash { get; private set; }
 		public bool IsInvulnerable => Time.time < invulnerableUntil;
 		public bool IsDashing => Time.time < dashUntil;
@@ -67,7 +64,6 @@ namespace MyArcade
 		public bool IsAiming { get; private set; }
 		public event Action Shot;
 
-		/// <summary>Dependencies are handed in from outside (dependency injection).</summary>
 		public void Setup(IInputSource input, IBulletSpawner bullets, Weapon[] weapons, IAbility[] abilities)
 		{
 			this.input = input;
@@ -77,7 +73,7 @@ namespace MyArcade
 			currentWeapon = 0;
 			Stats.Reset();
 			Slash?.Dispose();
-			Slash = new SlashSkill(this);
+			Slash = new SlashSkill(this, slashZone, slashAim, slashReticle, slashFlash, ultTrail);
 			GameEvents.EnemyKilled += OnEnemyKilledAmmo;
 			GameEvents.RaisePlayerHealthChanged(Health, MaxHealth);
 			GameEvents.RaiseWeaponChanged(currentWeapon);
@@ -125,7 +121,6 @@ namespace MyArcade
 			Vector3 face = IsDashing ? dashDirection : aim != Vector3.zero ? aim : LastMoveDirection;
 			if (IsAiming && !IsDashing)
 			{
-
 				Vector3 toMouse = gunTarget - transform.position;
 				toMouse.y = 0f;
 				if (toMouse.sqrMagnitude > 0.04f)
@@ -171,7 +166,6 @@ namespace MyArcade
 
 			if (IsAiming && input.AttackHeld && !IsDashing)
 			{
-
 				Vector3 gunAim = gunTarget - transform.position;
 				gunAim.y = 0f;
 				gunAim = gunAim.sqrMagnitude > 0.04f ? gunAim.normalized : aim;
@@ -227,7 +221,6 @@ namespace MyArcade
 			FinishFrame();
 		}
 
-		/// <summary>Called by ParryAbility. Only from a normal stance: not while dashing, already guarding or in the rest after a guard.</summary>
 		public bool TryStartParry()
 		{
 			if (IsParrying || IsDashing || Time.time < parryReadyAt || Slash.IsAiming || Slash.IsSlashing)
@@ -239,7 +232,6 @@ namespace MyArcade
 			GameEvents.RaiseSound("parry_ready");
 			return true;
 		}
-
 
 		public void CancelParryForDash()
 		{
@@ -254,7 +246,6 @@ namespace MyArcade
 			parryUntil = 0f;
 			parryReadyAt = Time.time + ParryDelay;
 		}
-
 
 		public bool TakeShot(Bullet bullet)
 		{
@@ -296,17 +287,15 @@ namespace MyArcade
 			return false;
 		}
 
-		/// <summary>Called by DashAbility.</summary>
 		public void StartDash(Vector3 direction, float duration, float speedMultiplier)
 		{
 			dashDirection = direction;
 			dashUntil = Time.time + duration;
-			GrantInvulnerability(duration + 0.04f); // easier than the original: the dash itself is a safe moment
+			GrantInvulnerability(duration + 0.04f); // the dash itself is a safe moment
 			dashSpeedMultiplier = speedMultiplier;
 			transform.forward = direction;
 		}
 
-		/// <summary>Swings and shots go the way the hero is walking (the last walking direction while standing still).</summary>
 		private Vector3 AttackDirection()
 		{
 			Vector3 wish = input.MoveDirection;
@@ -317,7 +306,6 @@ namespace MyArcade
 			return attackDirection;
 		}
 
-		/// <summary>Where the mouse points on the ground; <paramref name="fallback"/> when the camera or ray is missing.</summary>
 		public Vector3 PointerOnGround(Vector3 fallback)
 		{
 			Camera cam = Camera.main;
@@ -335,25 +323,21 @@ namespace MyArcade
 			Ammo = Mathf.Min(MaxAmmo, Ammo + AmmoPerKill * Stats.AmmoRegenScale);
 		}
 
-
 		public void RestoreStamina()
 		{
 			Stamina = 1f;
 		}
 
-		/// <summary>Called by SlashSkill: a short invulnerability around the slash.</summary>
 		public void GrantInvulnerability(float seconds)
 		{
 			invulnerableUntil = Mathf.Max(invulnerableUntil, Time.time + seconds);
 		}
 
-		/// <summary>Sets (not extends) the remaining invulnerability, e.g. to end the long one of the ultimate.</summary>
 		public void SetInvulnerableFor(float seconds)
 		{
 			invulnerableUntil = Time.time + seconds;
 		}
 
-		/// <summary>Called by SlashSkill: plays the swing animation at the end of the dash.</summary>
 		public void PlaySlashPose()
 		{
 			RaiseAttacked("attack-melee-right");
@@ -371,7 +355,6 @@ namespace MyArcade
 			GameEvents.RaiseSound("hurt");
 		}
 
-		/// <summary>Polymorphism: same call as for everyone, but the player ignores hits right after being hit.</summary>
 		public override void TakeDamage(int amount, GameObject source)
 		{
 			if (IsInvulnerable)
@@ -380,7 +363,6 @@ namespace MyArcade
 			}
 			if (IsParrying && !(source != null && source.GetComponent<IUnparryable>() != null))
 			{
-
 				CameraRig.Shake(2f, 0.1f, 0.015f);
 				GameEvents.RaiseDeflected(transform.position + Vector3.up);
 				GameEvents.RaiseSound("parry");

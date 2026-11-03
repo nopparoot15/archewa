@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>A bright curved swish drawn in front of the attacker for a split second (the "slash" of a swing).</summary>
 	public class SlashArc : MonoBehaviour
 	{
 		private const float Duration = 0.14f;
@@ -12,20 +11,14 @@ namespace MyArcade
 		private Material material;
 		private float age = Duration;
 
-		public void Build(Material baseMaterial)
-		{
-			mesh = new Mesh { name = "SlashArc" };
-			var filter = gameObject.AddComponent<MeshFilter>();
-			filter.sharedMesh = mesh;
-			var renderer = gameObject.AddComponent<MeshRenderer>();
-			material = new Material(baseMaterial);
-			renderer.sharedMaterial = material;
-			renderer.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-			gameObject.SetActive(false);
-		}
-
 		public void Show(Vector3 origin, Vector3 direction, float reach, float arcDegrees)
 		{
+			if (mesh == null)
+			{
+				mesh = new Mesh { name = "SlashArc" };
+				GetComponent<MeshFilter>().sharedMesh = mesh;
+				material = GetComponent<MeshRenderer>().material;
+			}
 			direction.y = 0f;
 			if (direction.sqrMagnitude < 0.01f)
 			{

@@ -72,7 +72,7 @@ classDiagram
 | **Polymorphism** | `Shieldman.TakeDamage()` บล็อกจากด้านหน้า; `Shotgunner.Fire()` เปลี่ยนเป็นยิงกระจาย; `Splitter.Die()` ส่งเหตุการณ์ให้เกิดศัตรูเพิ่ม |
 | **Encapsulation** | สถานะการพุ่ง ตัวจับเวลา และตัวแปรภายในซ่อนด้วย `private`; ค่าสำหรับคลาสลูกใช้ `protected`; ภายนอกอ่านสถานะผ่าน properties เช่น `VisualPose` และ `IsOpen` |
 | **Interfaces** | `Bomber : IExplosive`, `Commander : IBuffer`, `Assassin : IShootable, IUnparryable` และ `Enemy : IPoolable` แยกความสามารถตามหน้าที่ |
-| **Factory / Registry** | `EnemyCatalog` เก็บฟังก์ชันสร้าง ประเภท กลุ่ม เกณฑ์ปลดล็อก และน้ำหนักสุ่ม; `SceneFactory` ใช้ข้อมูลนี้สร้างตัวละคร |
+| **Factory / Registry** | `EnemyCatalog` เก็บฟังก์ชันสร้าง ประเภท กลุ่ม เกณฑ์ปลดล็อก และน้ำหนักสุ่ม; `EnemyFactory` ใช้ข้อมูลนี้สร้างตัวละคร |
 | **Object Pool** | `Spawner` เก็บ `ObjectPool<Enemy>` แยกตามประเภทและคืนตัวที่เลิกใช้งานกลับ Pool |
 | **Events** | `Splitter` แจ้งผ่าน `GameEvents.EnemySplit`; `Spawner` เป็นผู้สร้าง Sprinter สองตัว โดย Splitter ไม่ต้องอ้างอิง Spawner โดยตรง |
 
@@ -94,4 +94,4 @@ classDiagram
 - [Contracts.cs](Assets/Scripts/Core/Contracts.cs) — Interfaces
 - [Spawner.cs](Assets/Scripts/Game/Spawner.cs) — การสุ่มเกิด การปลดล็อก และวงจรบอส
 - [ObjectPool.cs](Assets/Scripts/Core/ObjectPool.cs) — การนำวัตถุกลับมาใช้
-- [SceneFactory.cs](Assets/Scripts/Bootstrap/SceneFactory.cs) — การสร้างตัวละครจาก Catalog
+- [EnemyFactory.cs](Assets/Scripts/Game/EnemyFactory.cs) — การสร้างตัวละครจาก Catalog

@@ -4,10 +4,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Sound: effects come from the original game's recordings (Resources/Audio), with synthesised fallbacks; there is no music.
-	/// It does not know who attacks whom: it just listens to GameEvents (Observer).
-	/// </summary>
 	public class AudioDirector : MonoBehaviour
 	{
 		private const int SampleRate = 22050;
@@ -15,13 +11,13 @@ namespace MyArcade
 
 		private readonly Dictionary<string, AudioClip> clips = new Dictionary<string, AudioClip>();
 		private readonly Dictionary<string, AudioClip[]> variants = new Dictionary<string, AudioClip[]>(); // real recordings, several per sound
-		private AudioSource[] voices;
+		[SerializeField] private AudioSource[] voices;
+		[SerializeField] private AudioSource guardVoice;
 		private int nextVoice;
 		private GameManager game;
 		private IInputSource input;
 		private bool muted;
 		private Player guardOwner;
-		private AudioSource guardVoice;
 		private bool guardPaused;
 
 		public void Setup(GameManager manager, IInputSource inputSource, Player owner)
@@ -39,17 +35,6 @@ namespace MyArcade
 
 			BuildClips();
 			LoadRecordings();
-			voices = new AudioSource[10];
-			for (int i = 0; i < voices.Length; i++)
-			{
-				voices[i] = gameObject.AddComponent<AudioSource>();
-				voices[i].playOnAwake = false;
-			}
-			guardVoice = gameObject.AddComponent<AudioSource>();
-			guardVoice.playOnAwake = false;
-			guardVoice.loop = true;
-			guardVoice.clip = Resources.Load<AudioClip>("Audio/parry_ready/metalresonance");
-			guardVoice.volume = .75f;
 			GameEvents.SoundRequested += Play;
 			GameEvents.EnemyKilled += _ => Play("ko");
 			GameEvents.WaveStarted += _ => Play("wave");
@@ -81,13 +66,11 @@ namespace MyArcade
 
 		public bool Muted => muted;
 
-		/// <summary>Called by the options menu after the volume changed.</summary>
 		public void RefreshVolume()
 		{
 			ApplyMute();
 		}
 
-		/// <summary>The sounds of the original game (Resources/Audio/&lt;sound&gt;/*.wav); a sound without a recording keeps its synthesised version.</summary>
 		private void LoadRecordings()
 		{
 			foreach (string id in new[] { "swing", "shot", "empty", "hit", "heavy", "dash", "ko", "deflect", "parry", "warning", "wave", "gameover", "ui_select", "ui_confirm", "ui_cancel" })
@@ -149,8 +132,6 @@ namespace MyArcade
 			voice.PlayOneShot(clip, 0.9f);
 		}
 
-		// ---- synthesis ------------------------------------------------------------------
-
 		private void BuildClips()
 		{
 			clips["swing"] = Make("swing", 0.12f, t => Mathf.Lerp(900f, 250f, t), 0.9f, 2.0f, 0.22f);
@@ -168,7 +149,6 @@ namespace MyArcade
 			clips["gameover"] = Notes("gameover", 0.28f, new[] { 392f, 330f, 262f, 196f }, 0.5f, true);
 		}
 
-		/// <summary>One sound: a pitch-sweeping tone mixed with noise and a fading volume.</summary>
 		private static AudioClip Make(string name, float seconds, Func<float, float> frequency, float noise, float decay, float volume)
 		{
 			int count = Mathf.CeilToInt(seconds * SampleRate);
@@ -207,7 +187,6 @@ namespace MyArcade
 			return ToClip(name, data);
 		}
 
-		/// <summary>8-second night-street loop: bass, off-beat chords and a pentatonic lead (A minor, 120 bpm).</summary>
 		private static AudioClip ToClip(string name, float[] data)
 		{
 			var clip = AudioClip.Create(name, data.Length, 1, SampleRate, false);

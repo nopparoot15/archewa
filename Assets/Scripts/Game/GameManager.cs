@@ -11,11 +11,6 @@ namespace MyArcade
 		GameOver
 	}
 
-	/// <summary>
-	/// Keeps score, combo and the game state. Listens to events; nobody calls it directly except the UI (read only).
-	/// A small state machine: Title -> Playing <-> Paused, Playing -> GameOver -> (restart).
-	/// It is also the only place that touches Time.timeScale (pause + slow-motion).
-	/// </summary>
 	public class GameManager : MonoBehaviour
 	{
 		private const string BestKey = "MyArcade.BestKills";
@@ -32,14 +27,12 @@ namespace MyArcade
 		public int Wave { get; private set; }
 		public int Combo { get; private set; }
 		public int BestCombo { get; private set; }
-		/// <summary>1 right after a kill, drains to 0 when the combo breaks.</summary>
 		public float ComboTimeLeft => Combo > 0 ? Mathf.Clamp01((comboExpires - Time.time) / ComboWindow) : 0f;
 		public int Health { get; private set; }
 		public int MaxHealth { get; private set; }
 		public int WeaponSlot { get; private set; }
 		public int Kills { get; private set; }
 		public bool NewRecord { get; private set; }
-
 
 		public int Boldness { get; private set; }
 		public int BestBoldness { get; private set; }
@@ -49,7 +42,6 @@ namespace MyArcade
 		public float Accuracy => Attacks > 0 ? Hits / (float)Attacks : 0f;
 		public event Action<int> BoldnessAdded;
 
-		/// <summary>Who needs to know when the state changes (camera, UI, spawner, player).</summary>
 		public event Action<GameState> StateChanged;
 
 		public static int LastKnownHealth { get; private set; }
@@ -150,7 +142,6 @@ namespace MyArcade
 			StateChanged?.Invoke(next);
 		}
 
-		/// <summary>Used by the bootstrap to put the game in its first state.</summary>
 		public void SetState(GameState next)
 		{
 			ChangeState(next);

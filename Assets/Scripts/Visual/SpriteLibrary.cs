@@ -3,12 +3,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Finds the 2D animation frames (Resources/Sprites/&lt;set&gt;/&lt;clip&gt;/&lt;direction&gt;_&lt;nn&gt;.png, made by
-	/// tools/slice_sprites.py and slice_brute.py) and says how fast each clip plays.
-	/// Every character with its own drawings is an "art set" with its own clip table; a new set only needs a folder
-	/// and a table here. Characters without a set borrow the "player" set (tinted).
-	/// </summary>
 	public static class SpriteLibrary
 	{
 		public readonly struct ClipInfo
@@ -25,10 +19,8 @@ namespace MyArcade
 			}
 		}
 
-		/// <summary>The three drawn views. "Right" is mirrored for left.</summary>
 		public enum View { Front = 0, Back = 1, Right = 2 }
 
-		/// <summary>World height (in metres) of the standing character on the canvas: 92 px at 50 pixels per unit.</summary>
 		public const float StandingHeight = 1.84f;
 
 		private static readonly string[] ViewNames = { "front", "back", "right" };
@@ -40,17 +32,17 @@ namespace MyArcade
 					{ "idle", new ClipInfo(4, 5f, true) },
 					{ "walk", new ClipInfo(9, 12f, true) },
 					{ "run", new ClipInfo(11, 16f, true) },
-					{ "walk_side", new ClipInfo(8, 12f, true) },   // right view only, a proper 8-pose cycle
-					{ "walk_front", new ClipInfo(8, 12f, true) },  // front view only
+					{ "walk_side", new ClipInfo(8, 12f, true) }, // right view only, a proper 8-pose cycle
+					{ "walk_front", new ClipInfo(8, 12f, true) }, // front view only
 					{ "walk_back", new ClipInfo(8, 12f, true) },
-					{ "idle_side", new ClipInfo(8, 6f, true) },    // drawn idle (right view; also stands in for the back view)
+					{ "idle_side", new ClipInfo(8, 6f, true) }, // drawn idle (right view; also stands in for the back view)
 					{ "idle_front", new ClipInfo(8, 6f, true) },
 					{ "run_side", new ClipInfo(8, 16f, true) },
 					{ "run_back", new ClipInfo(8, 16f, true) },
 					{ "run_front", new ClipInfo(8, 16f, true) },
-					{ "dash_side", new ClipInfo(8, 20f, true) },   // right view only: the dash always shows its side view
+					{ "dash_side", new ClipInfo(8, 20f, true) }, // right view only: the dash always shows its side view
 					{ "hurt_side", new ClipInfo(8, 16f, false) },
-					{ "die_side", new ClipInfo(7, 9f, false) },    // holds its last frame (lying down)
+					{ "die_side", new ClipInfo(7, 9f, false) }, // holds its last frame (lying down)
 					{ "parry_side", new ClipInfo(8, 20f, false) },
 					{ "slash_ready_side", new ClipInfo(3, 12f, false) }, // the crouched stance held while the slash line is chosen (right view, mirrored)
 					{ "shoot_side", new ClipInfo(8, 24f, false) }, // frame 2 = aiming pose, frames 3.. = the shot with muzzle flash

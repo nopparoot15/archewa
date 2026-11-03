@@ -2,7 +2,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-
 	public class CharacterView : MonoBehaviour
 	{
 		private static readonly Color NightTint = new Color(0.92f, 0.94f, 1f);
@@ -23,7 +22,7 @@ namespace MyArcade
 		private bool mirror;
 		private float flashUntil;
 		private bool wasDead;
-		private bool bounce;    // extra step bounce, only for views whose drawn legs barely move
+		private bool bounce; // extra step bounce, only for views whose drawn legs barely move
 		private bool wasParrying;
 		private bool wasSlashAiming;
 		private float windupStart;
@@ -32,49 +31,14 @@ namespace MyArcade
 		private float legsTime;
 		private const float HipHeight = 36f; // pixels above the feet where the sprite is cut into legs and upper body
 		private static readonly System.Collections.Generic.Dictionary<int, Sprite> SplitCache = new System.Collections.Generic.Dictionary<int, Sprite>();
-		private float recoil;    // 1 right after a shot, fades out: the sprite kicks back a little
-		private float roll;     // little sway while walking
-		private float tip;      // how far a fallen fighter has tipped over (0..90 degrees)
+		private float recoil; // 1 right after a shot, fades out: the sprite kicks back a little
+		private float roll; // little sway while walking
+		private float tip; // how far a fallen fighter has tipped over (0..90 degrees)
 		private bool attached;
 		private GeneratedSpriteAnimator generated;
 		private PlayerLegLayer independentLegs;
 		private PixelCastAnimator pixelCast;
-
-		/// <summary>Creates the visible children. Safe to call in edit mode. The art set is shared; enemies get a tint.</summary>
-		public void BuildVisuals(string modelName, Color accent, float targetHeight)
-		{
-			artSet = GetComponent<Brute>() != null ? "brute" : "player";
-			baseScale = targetHeight / SpriteLibrary.StandingHeight;
-			var go = new GameObject("Model");
-			go.transform.SetParent(transform, false);
-			go.transform.localPosition = Vector3.zero;
-			go.transform.localScale = Vector3.one * baseScale;
-			sprite = go.AddComponent<SpriteRenderer>();
-			sprite.sprite = SpriteLibrary.Get(artSet, "idle_front", SpriteLibrary.View.Front, 0);
-			Character drawingOwner = GetComponent<Character>();
-			if (drawingOwner != null && PixelCastAnimator.Available(drawingOwner))
-				sprite.sprite = Resources.Load<Sprite>(PixelAnimationSet.Folder(PixelAnimationSet.Id(drawingOwner)) + "idle/front_00");
-			else if (drawingOwner != null && GeneratedSpriteAnimator.Available(drawingOwner))
-			{
-				string generatedId = drawingOwner is Player ? "player" : ((Enemy)drawingOwner).Kind.ToString().ToLowerInvariant();
-				sprite.sprite = Resources.Load<Sprite>("Sprites/v2_" + generatedId + "/idle/front_00");
-			}
-			sprite.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-			sprite.receiveShadows = false;
-			sprite.sortingOrder = 1;
-			MakeLegs(go.transform);
-			bool isPlayer = GetComponent<Player>() != null;
-			baseColor = isPlayer || artSet != "player" ? NightTint : Color.Lerp(NightTint, accent, 0.5f); // own drawings keep their colours
-			sprite.color = baseColor;
-			FaceCamera(go.transform);
-		}
-
-		/// <summary>Runtime-created characters (pooled enemies): build the visuals and start listening.</summary>
-		public void Build(Character character, string modelName, Color accent, float targetHeight)
-		{
-			BuildVisuals(modelName, accent, targetHeight);
-			Attach();
-		}
+		private GameObject shadow;
 
 		private void Awake()
 		{
@@ -97,6 +61,8 @@ namespace MyArcade
 				return;
 			}
 			sprite = model.GetComponent<SpriteRenderer>();
+			Transform shadowChild = model.Find("shadows");
+			shadow = shadowChild != null ? shadowChild.gameObject : null;
 			if (sprite == null)
 			{
 				return;
@@ -105,27 +71,26 @@ namespace MyArcade
 			if (PixelCastAnimator.Available(owner))
 			{
 				Transform pixelLaser = transform.Find("Laser");
-				laser = pixelLaser != null ? pixelLaser.GetComponent<LineRenderer>() : (owner is Shooter ? MakeLaser() : null);
-				pixelCast = gameObject.AddComponent<PixelCastAnimator>();
+				laser = pixelLaser != null ? pixelLaser.GetComponent<LineRenderer>() : null;
+				pixelCast = GetComponent<PixelCastAnimator>();
 				pixelCast.Initialize(owner, sprite, model, model.localScale.x);
 				return;
 			}
 			if (GeneratedSpriteAnimator.Available(owner))
 			{
 				Transform existingLaser = transform.Find("Laser");
-				laser = existingLaser != null ? existingLaser.GetComponent<LineRenderer>() : (owner is Shooter ? MakeLaser() : null);
-				generated = gameObject.AddComponent<GeneratedSpriteAnimator>();
+				laser = existingLaser != null ? existingLaser.GetComponent<LineRenderer>() : null;
+				generated = GetComponent<GeneratedSpriteAnimator>();
 				generated.Initialize(owner, sprite, model, model.localScale.x);
 				return;
 			}
 			artSet = GetComponent<Brute>() != null ? "brute" : "player";
 			Transform laserChild = transform.Find("Laser");
-			laser = laserChild != null ? laserChild.GetComponent<LineRenderer>() : (owner is Shooter ? MakeLaser() : null);
+			laser = laserChild != null ? laserChild.GetComponent<LineRenderer>() : null;
 			legs = model.Find("Legs") != null ? model.Find("Legs").GetComponent<SpriteRenderer>() : MakeLegs(model);
 			if (owner is Player layeredPlayer)
 			{
-				independentLegs = gameObject.GetComponent<PlayerLegLayer>();
-				if (independentLegs == null) independentLegs = gameObject.AddComponent<PlayerLegLayer>();
+				independentLegs = GetComponent<PlayerLegLayer>();
 				independentLegs.Initialize(layeredPlayer);
 			}
 			baseScale = model.localScale.x;
@@ -140,6 +105,10 @@ namespace MyArcade
 
 		private void Update()
 		{
+			if (shadow != null && owner != null)
+			{
+				shadow.SetActive(!owner.IsDead);
+			}
 			if (generated != null || pixelCast != null) return;
 			if (independentLegs != null) independentLegs.Tick();
 			if (owner == null || sprite == null)
@@ -195,23 +164,6 @@ namespace MyArcade
 			ApplyLook();
 		}
 
-		private LineRenderer MakeLaser()
-		{
-			var go = new GameObject("Laser");
-			go.transform.SetParent(transform, false);
-			LineRenderer line = go.AddComponent<LineRenderer>();
-			line.useWorldSpace = true;
-			line.positionCount = 2;
-			line.startWidth = 0.05f;
-			line.endWidth = 0.025f;
-			line.sharedMaterial = SceneFactory.MakeGlowMaterial(new Color(1f, 0.08f, 0.08f), 2.4f);
-			line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
-			line.enabled = false;
-			laser = line;
-			return line;
-		}
-
-
 		private void UpdateLaser()
 		{
 			if (laser == null)
@@ -247,7 +199,6 @@ namespace MyArcade
 			}
 		}
 
-		/// <summary>The sprite stands upright and turns to the camera; a fallen fighter tips over backwards.</summary>
 		private void FaceCamera(Transform t)
 		{
 			Camera cam = Camera.main;
@@ -255,7 +206,6 @@ namespace MyArcade
 			t.rotation = look * Quaternion.Euler(0f, 0f, (mirror ? tip : -tip) + roll);
 		}
 
-		/// <summary>Chooses front / back / right(mirrored) from where the fighter looks, relative to the camera.</summary>
 		private void PickView()
 		{
 			if (oneShot != null || owner.IsDead)
@@ -394,7 +344,7 @@ namespace MyArcade
 			Sprite next = SpriteLibrary.Get(artSet, clip, shown, frame);
 			sprite.flipX = flip;
 
-			// Independent pelvis-anchored leg art: use the same cycle during running, attacking and guarding.
+			// legs are a separate layer, same cycle for running/attacking/guarding
 			bool splitAllowed = oneShot == null || oneShot == "pipe_swing" || oneShot == "parry_side" || oneShot == "shoot_side";
 			if (splitAllowed && next != null && independentLegs != null && independentLegs.Ready && owner is Player movingPlayer)
 			{
@@ -438,7 +388,6 @@ namespace MyArcade
 			}
 		}
 
-		/// <summary>Front / back / right(+mirror) for a world direction, relative to the camera.</summary>
 		private static SpriteLibrary.View ViewFor(Vector3 dir, out bool mirrored)
 		{
 			Vector3 camRight = Camera.main != null ? Camera.main.transform.right : Vector3.right;
@@ -467,7 +416,6 @@ namespace MyArcade
 			return r;
 		}
 
-		/// <summary>Cuts a frame at the hips: the upper part (swing) or the lower part (running legs). Same pivot, so the halves line up.</summary>
 		private static Sprite SplitSprite(Sprite whole, bool upper)
 		{
 			int key = whole.GetInstanceID() * 2 + (upper ? 1 : 0);
@@ -525,7 +473,7 @@ namespace MyArcade
 			if (legs != null) legs.color = c;
 			if (independentLegs != null && independentLegs.Ready && legs != null && legs.enabled)
 			{
-				// The ground and waist stay fixed: procedural squash/bounce would undo the registration of the drawn layers.
+				// ground and waist stay fixed or the drawn layers would drift apart
 				model.localScale = Vector3.one * baseScale;
 				model.localPosition = Vector3.zero;
 				roll = 0f;

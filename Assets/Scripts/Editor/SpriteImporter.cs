@@ -3,7 +3,6 @@ using UnityEngine;
 
 namespace MyArcade.EditorTools
 {
-	/// <summary>Every PNG under Resources/Sprites becomes a crisp pixel-art sprite (point filter, no compression, feet pivot).</summary>
 	public class SpriteImporter : AssetPostprocessor
 	{
 		private const string Folder = "Assets/Resources/Sprites/";

@@ -4,7 +4,6 @@ using UnityEngine.UI;
 
 namespace MyArcade
 {
-
 	public class GameUi : MonoBehaviour
 	{
 		private static readonly Color Cyan = new Color(0.35f, 0.95f, 1f);
@@ -49,8 +48,6 @@ namespace MyArcade
 		private int lastHealth = -1;
 		private float bannerTimer;
 		private float hintTimer = 14f;
-
-		// ---- building (works in edit mode) ---------------------------------------------------
 
 		public void Bind(GameManager manager, Player owner, AudioDirector audio)
 		{
@@ -125,7 +122,6 @@ namespace MyArcade
 			}
 		}
 
-		/// <summary>Puts the cooldown line just under the hero's feet (screen position to canvas position).</summary>
 		private void UpdateCooldownLine()
 		{
 			if (cooldownLine == null || player == null || player.Abilities == null || player.Abilities.Length == 0 || Camera.main == null)
@@ -153,7 +149,6 @@ namespace MyArcade
 			{
 				return;
 			}
-
 
 			if (bannerTimer > 0f)
 			{

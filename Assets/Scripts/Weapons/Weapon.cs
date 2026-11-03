@@ -3,11 +3,6 @@ using UnityEngine;
 
 namespace MyArcade
 {
-	/// <summary>
-	/// Template Method pattern: <see cref="TryUse"/> is the fixed recipe (check the cooldown,
-	/// then perform). Only <see cref="Perform"/> changes in each weapon.
-	/// A plain C# class (not a MonoBehaviour): a weapon is a thing the owner HAS (composition).
-	/// </summary>
 	public abstract class Weapon
 	{
 		public string DisplayName { get; }
@@ -22,7 +17,6 @@ namespace MyArcade
 			this.damage = damage;
 		}
 
-		/// <summary>Tries to attack. Returns the animation clip to play, or null if still cooling down.</summary>
 		public string TryUse(AttackContext context)
 		{
 			if (Time.time < nextUseTime)
@@ -35,10 +29,8 @@ namespace MyArcade
 			return NextClip();
 		}
 
-		/// <summary>What this weapon does when used.</summary>
 		protected abstract void Perform(AttackContext context);
 
-		/// <summary>Which animation shows it. Weapons may alternate.</summary>
 		protected abstract string NextClip();
 
 		protected int Damage(AttackContext context)
@@ -47,10 +39,6 @@ namespace MyArcade
 		}
 	}
 
-	/// <summary>
-	/// Hits everything in an arc in front of the attacker (the steel pipe) and can also knock
-	/// flying stones back at the thrower (IBulletDeflector).
-	/// </summary>
 	public abstract class MeleeWeapon : Weapon, IBulletDeflector
 	{
 		private readonly float reach;
@@ -111,7 +99,6 @@ namespace MyArcade
 				}
 			}
 
-
 			if (closest != null)
 			{
 				Vector3 away = closestCollider.transform.position - context.Origin;
@@ -147,7 +134,6 @@ namespace MyArcade
 		}
 	}
 
-	/// <summary>Steel pipe: longest reach and the hardest hit, but slow.</summary>
 	public class SteelPipe : MeleeWeapon
 	{
 		public SteelPipe() : base("STEEL PIPE", 0.3f, 3, 2.3f, 100f, 8f)

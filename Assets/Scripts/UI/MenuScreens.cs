@@ -5,13 +5,11 @@ using UnityEngine.UI;
 
 namespace MyArcade
 {
-
 	public class MenuScreens : MonoBehaviour
 	{
 		private static readonly Color Lit = new Color(.96f, .30f, .36f);
 		private static readonly Color Unlit = new Color(.94f, .92f, .86f, .9f);
 
-		/// <summary>True for the frame in which Esc was used to go back inside a menu (so the pause toggle ignores it).</summary>
 		public static bool BackHandled => backFrame == Time.frameCount || subScreenOpen;
 
 		private static int backFrame = -1;
@@ -32,7 +30,7 @@ namespace MyArcade
 		private IInputSource input;
 		private AudioDirector sound;
 		private Screen current = Screen.None;
-		private Screen backTo = Screen.None;     // where BACK of Options / How to play / Credits returns
+		private Screen backTo = Screen.None; // where BACK of Options / How to play / Credits returns
 		private int selected;
 		private TextMeshProUGUI fpsLabel;
 		private float fpsTimer;
@@ -86,8 +84,6 @@ namespace MyArcade
 			panels[screen] = panel;
 		}
 
-		// ---- which screen is open ----------------------------------------------------------
-
 		private void OnStateChanged(GameState state)
 		{
 			subScreenOpen = false;
@@ -134,8 +130,6 @@ namespace MyArcade
 			GameEvents.RaiseSound("ui_cancel");
 			Open(backTo == Screen.None ? Screen.Title : backTo);
 		}
-
-		// ---- every frame --------------------------------------------------------------------
 
 		private void Update()
 		{
@@ -238,8 +232,6 @@ namespace MyArcade
 			}
 		}
 
-		// ---- what each item does -----------------------------------------------------------
-
 		private void Activate(int direction)
 		{
 			bool isBack = current == Screen.HowToPlay || current == Screen.Credits || (current == Screen.Options && selected == 5);
@@ -265,11 +257,11 @@ namespace MyArcade
 		{
 			switch (index)
 			{
-				case 0: game.SetState(GameState.Playing); break;               // PLAY
-				case 1: OpenSub(Screen.HowToPlay); break;                      // TUTORIAL (how to play)
-				case 2: OpenSub(Screen.Options); break;                        // OPTIONS
-				case 3: OpenSub(Screen.Credits); break;                        // CREDITS
-				case 4: Quit(); break;                                         // EXIT
+				case 0: game.SetState(GameState.Playing); break;
+				case 1: OpenSub(Screen.HowToPlay); break;
+				case 2: OpenSub(Screen.Options); break;
+				case 3: OpenSub(Screen.Credits); break;
+				case 4: Quit(); break;
 			}
 		}
 
@@ -277,11 +269,11 @@ namespace MyArcade
 		{
 			switch (index)
 			{
-				case 0: game.SetState(GameState.Playing); break;               // RESUME
-				case 1: GameBootstrap.Restart(); break;                        // RESTART
-				case 2: OpenSub(Screen.Options); break;                        // OPTIONS
-				case 3: OpenSub(Screen.HowToPlay); break;                      // HOW TO PLAY
-				case 4: GameBootstrap.ReturnToTitle(); break;                  // MAIN MENU
+				case 0: game.SetState(GameState.Playing); break;
+				case 1: GameBootstrap.Restart(); break;
+				case 2: OpenSub(Screen.Options); break;
+				case 3: OpenSub(Screen.HowToPlay); break;
+				case 4: GameBootstrap.ReturnToTitle(); break;
 			}
 		}
 
@@ -294,7 +286,7 @@ namespace MyArcade
 				case 2: GameSettings.Fullscreen = !GameSettings.Fullscreen; GameSettings.Apply(); break;
 				case 3: GameSettings.Vsync = !GameSettings.Vsync; GameSettings.Apply(); break;
 				case 4: GameSettings.ShowFps = !GameSettings.ShowFps; break;
-				case 5: GoBack(); return;                                      // BACK
+				case 5: GoBack(); return;
 			}
 			RefreshOptions();
 		}
@@ -321,8 +313,6 @@ namespace MyArcade
 			Application.Quit();
 #endif
 		}
-
-		// ---- the fps counter (OPTIONS > SHOW FPS) ---------------------------------------------
 
 		private void UpdateFps()
 		{
