@@ -114,7 +114,7 @@ namespace MyArcade
 				Move(wish, RunSpeed * Stats.MoveSpeedScale * (IsAiming ? AimMoveScale : 1f) * Slash.MoveBoost);
 			}
 
-			// the fighter faces the mouse (and swings toward it); while dashing it faces the dash
+			// Melee follows the last movement direction; gun aiming follows the pointer.
 			Vector3 gunTarget = IsAiming && input != null
 				? GunAim.Point(Camera.main, input.PointerScreenPosition, transform.position + aim)
 				: transform.position + aim;
@@ -189,7 +189,7 @@ namespace MyArcade
 			}
 			else if (input.AttackHeld && aim != Vector3.zero && !IsDashing)
 			{
-				// the swing goes toward the mouse, where the fighter faces
+				// Swing in the last movement direction, even when the pointer moves.
 				Vector3 facing = aim;
 				if (Stamina < StaminaPerSwing)
 				{
@@ -298,11 +298,10 @@ namespace MyArcade
 
 		private Vector3 AttackDirection()
 		{
-			Vector3 aim = PointerOnGround(transform.position + attackDirection) - transform.position;
-			aim.y = 0f;
-			if (aim.sqrMagnitude > 0.01f)
+			Vector3 movement = input.MoveDirection;
+			if (movement.sqrMagnitude > 0.01f)
 			{
-				attackDirection = aim.normalized;
+				attackDirection = movement.normalized;
 			}
 			return attackDirection;
 		}
