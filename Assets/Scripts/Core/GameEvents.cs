@@ -15,6 +15,7 @@ namespace MyArcade
 		public static event Action<Enemy> BossChanged; // boss appeared (or null when it is gone)
 		public static event Action<Vector3> BossCharging; // boss warns before charging
 		public static event Action<string> SoundRequested; // "hit", "deflect"...
+		public static event Action<Vector3> EnemyGuarded; // feedback only; no player rewards
 		public static event Action<Vector3> Deflected; // a stone was hit back
 		public static event Action<Vector3, Vector3, float, float> AttackSwung; // origin, direction, reach, arc (for the swing trail)
 		public static event Action<Vector3> DashStarted;
@@ -38,6 +39,7 @@ namespace MyArcade
 		public static void RaiseBossChanged(Enemy boss) { BossChanged?.Invoke(boss); }
 		public static void RaiseBossCharging(Vector3 position) { BossCharging?.Invoke(position); }
 		public static void RaiseSound(string id) { SoundRequested?.Invoke(id); }
+		public static void RaiseEnemyGuarded(Vector3 position) { EnemyGuarded?.Invoke(position); }
 		public static void RaiseDeflected(Vector3 position) { Deflected?.Invoke(position); }
 		public static void RaiseAttackSwung(Vector3 origin, Vector3 direction, float reach, float arc) { AttackSwung?.Invoke(origin, direction, reach, arc); }
 		public static void RaiseDashStarted(Vector3 position) { DashStarted?.Invoke(position); }
@@ -64,6 +66,7 @@ namespace MyArcade
 			BossCharging = null;
 			SoundRequested = null;
 			Deflected = null;
+			EnemyGuarded = null;
 			AttackSwung = null;
 			DashStarted = null;
 			EnemySplit = null;

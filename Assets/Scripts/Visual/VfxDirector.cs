@@ -44,6 +44,7 @@ namespace MyArcade
 		{
 			GameEvents.HitLanded += OnHit;
 			GameEvents.Deflected += OnDeflected;
+			GameEvents.EnemyGuarded += OnDeflected;
 			GameEvents.EnemyKilled += OnKilled;
 			GameEvents.AttackSwung += OnSwing;
 			GameEvents.DashStarted += OnDash;
@@ -61,6 +62,7 @@ namespace MyArcade
 		{
 			GameEvents.HitLanded -= OnHit;
 			GameEvents.Deflected -= OnDeflected;
+			GameEvents.EnemyGuarded -= OnDeflected;
 			GameEvents.EnemyKilled -= OnKilled;
 			GameEvents.AttackSwung -= OnSwing;
 			GameEvents.DashStarted -= OnDash;

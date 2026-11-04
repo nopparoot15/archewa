@@ -23,14 +23,14 @@ namespace MyArcade
 		{
 			Camera cam = Camera.main;
 			Vector3 point = RandomEdgePoint();
-			if (cam == null || cam.orthographic == false)
+			if (cam == null)
 			{
 				return point;
 			}
 			for (int i = 0; i < 16; i++)
 			{
 				Vector3 view = cam.WorldToViewportPoint(point);
-				bool visible = view.x > -0.04f && view.x < 1.04f && view.y > -0.08f && view.y < 1.08f;
+				bool visible = view.z > 0f && view.x > -0.04f && view.x < 1.04f && view.y > -0.08f && view.y < 1.08f;
 				if (!visible)
 				{
 					return point;

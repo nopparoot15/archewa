@@ -103,13 +103,15 @@ namespace MyArcade
 			{
 				Vector3 away = closestCollider.transform.position - context.Origin;
 				away.y = 0f;
+				int healthBefore = closest is Character character ? character.Health : -1;
 				closest.TakeDamage(dealt, context.Owner);
-				if (closest is IKnockbackable pushable)
+				bool damaged = !(closest is Character hitCharacter) || hitCharacter.Health < healthBefore;
+				if (damaged && closest is IKnockbackable pushable)
 				{
 					pushable.ApplyKnockback(away.normalized * knockbackForce);
 				}
 				GameEvents.RaiseHitLanded(closestCollider.bounds.center, dealt);
-				if (context.Team == Team.Player)
+				if (damaged && context.Team == Team.Player)
 				{
 					SlowMotion.HitFreeze();
 					GameEvents.RaiseSwingConnected();

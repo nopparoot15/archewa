@@ -101,7 +101,7 @@ namespace MyArcade
 			}
 			if (!IsOpen)
 			{
-				GameEvents.RaiseDeflected(transform.position + Vector3.up);
+				GameEvents.RaiseEnemyGuarded(transform.position + Vector3.up);
 				GameEvents.RaiseSound("deflect");
 				return;
 			}
@@ -121,7 +121,7 @@ namespace MyArcade
 			}
 			Vector3 back = Quaternion.Euler(0f, Random.Range(-DeflectAngle, DeflectAngle), 0f) * -bullet.Direction;
 			bullet.Reflect(back, Team, gameObject, bullet.Damage);
-			GameEvents.RaiseDeflected(transform.position + Vector3.up);
+			GameEvents.RaiseEnemyGuarded(transform.position + Vector3.up);
 			GameEvents.RaiseSound("deflect");
 			return true;
 		}

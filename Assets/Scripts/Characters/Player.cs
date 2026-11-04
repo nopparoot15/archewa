@@ -298,10 +298,11 @@ namespace MyArcade
 
 		private Vector3 AttackDirection()
 		{
-			Vector3 wish = input.MoveDirection;
-			if (wish.sqrMagnitude > 0.01f)
+			Vector3 aim = PointerOnGround(transform.position + attackDirection) - transform.position;
+			aim.y = 0f;
+			if (aim.sqrMagnitude > 0.01f)
 			{
-				attackDirection = wish.normalized;
+				attackDirection = aim.normalized;
 			}
 			return attackDirection;
 		}

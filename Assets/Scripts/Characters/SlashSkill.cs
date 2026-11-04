@@ -246,14 +246,7 @@ namespace MyArcade
 				{
 					continue;
 				}
-				if (enemy is Boss boss)
-				{
-					boss.TakeSlayerHit();
-				}
-				else
-				{
-					enemy.TakeDamage(999, owner.gameObject);
-				}
+				enemy.TakeSlayerHit();
 				GameEvents.RaiseHitLanded(enemy.transform.position + Vector3.up, 4);
 			}
 			if (ultHit.Count > 0)
@@ -307,17 +300,23 @@ namespace MyArcade
 			yield return new WaitForSecondsRealtime(0.3f);
 
 			Enemy.Frozen = false;
+			int hits = 0;
 			foreach (Enemy enemy in victims)
 			{
 				if (enemy != null && !enemy.IsDead)
 				{
+					int healthBefore = enemy.Health;
 					enemy.TakeDamage(enemy is Brute ? GiantDamage : 99, owner.gameObject);
-					GameEvents.RaiseHitLanded(enemy.transform.position + Vector3.up, 4);
+					if (enemy.Health < healthBefore)
+					{
+						hits++;
+						GameEvents.RaiseHitLanded(enemy.transform.position + Vector3.up, 4);
+					}
 				}
 			}
-			if (victims.Count > 0)
+			if (hits > 0)
 			{
-				GameEvents.RaiseSlashLanded(victims.Count);
+				GameEvents.RaiseSlashLanded(hits);
 				CameraRig.Shake(2f, 0.1f, 0.015f);
 				GameEvents.RaiseSound("heavy");
 				SlowMotion.Pulse(0.25f, 0.25f);

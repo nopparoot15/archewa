@@ -23,7 +23,7 @@
 | <img src="Assets/Resources/Sprites/pixel_cast_v5/commander/idle/front_00.png" alt="Commander" width="72"> | **Commander** | 60<br>พิเศษ | รักษาระยะและบัฟศัตรูรอบตัวทุก 4 วินาที เพิ่มความเร็ว 1.45 เท่าเป็นเวลา 3 วินาที | ให้ความสำคัญกับการกำจัดก่อนฝูงที่ได้รับบัฟ |
 | <img src="Assets/Resources/Sprites/pixel_cast_v5/sniper/idle/front_00.png" alt="Sniper" width="72"> | **Sniper** | 70<br>พิเศษ | รักษาระยะไกล เตือนเล็ง 1.4 วินาที แล้วยิงนัดเดียวด้วยกระสุนที่เร็วกว่า Shooter | สังเกตแนวเล็งและหลบหรือ Parry ตามจังหวะยิง |
 | <img src="Assets/Resources/Sprites/pixel_cast_v5/assassin/idle/front_00.png" alt="Assassin" width="72"> | **Assassin** | 100<br>พิเศษ | เข้าระยะ → เตือน → พุ่ง → เบรก ช่วงปกติปัดการโจมตีและสะท้อนกระสุนกลับ การพุ่งข้ามการป้องกัน Parry ของผู้เล่น | หลบแนวพุ่ง แล้วโจมตีในช่วงเบรกที่เปิดช่อง 1.2 วินาที |
-| <img src="Assets/Resources/Sprites/pixel_cast_v5/boss/idle/front_00.png" alt="Boss" width="72"> | **Boss** | ทุก 100 ตัว<br>บอส 1v1 | เข้าหาแบบซิกแซก สลับโจมตีประชิด ยิงสามนัด และพุ่งต่อเนื่องสามครั้ง มีเกราะจนจบท่าพิเศษ | รอจบชุดพุ่งแล้วสวนช่วงเกราะเปิด หรือใช้ท่าไม้ตายที่ทะลุเกราะได้ |
+| <img src="Assets/Resources/Sprites/pixel_cast_v5/boss/idle/front_00.png" alt="Boss" width="72"> | **Boss** | ทุก 100 ตัว<br>บอส 1v1 | เข้าหาแบบซิกแซก สลับโจมตีประชิด ยิงสองนัด และพุ่งต่อเนื่องสามครั้ง มีเกราะจนจบท่าพิเศษ | รอจบชุดพุ่งแล้วสวนช่วงเกราะเปิด หรือใช้ท่าไม้ตายที่ทะลุเกราะได้ |
 
 ### จังหวะโจมตีพื้นฐาน
 
@@ -88,9 +88,9 @@ classDiagram
 
 - [Character.cs](Assets/Scripts/Characters/Character.cs) — ชีวิต ดาเมจ และ Knockback ร่วมกัน
 - [Enemy.cs](Assets/Scripts/Characters/Enemy.cs) — Enum, วงจรศัตรู, Buff, Pool และพฤติกรรม abstract
-- [EnemyTypes.cs](Assets/Scripts/Characters/EnemyTypes.cs) — Chaser, Brute, Shooter
-- [EnemyKinds.cs](Assets/Scripts/Characters/EnemyKinds.cs) — อีกเก้าประเภท และ EnemyCatalog
-- [SpecialEnemies.cs](Assets/Scripts/Characters/SpecialEnemies.cs) — Assassin, Boss และ IUnparryable
+- [Enemies](Assets/Scripts/Characters/Enemies) — คลาสศัตรูแต่ละประเภท รวม Assassin และ Boss
+- [EnemyCatalog.cs](Assets/Scripts/Characters/EnemyCatalog.cs) — กลุ่ม เกณฑ์ปลดล็อก และน้ำหนักสุ่ม
+- [IUnparryable.cs](Assets/Scripts/Characters/IUnparryable.cs) — การโจมตีที่ข้าม Parry
 - [Contracts.cs](Assets/Scripts/Core/Contracts.cs) — Interfaces
 - [Spawner.cs](Assets/Scripts/Game/Spawner.cs) — การสุ่มเกิด การปลดล็อก และวงจรบอส
 - [ObjectPool.cs](Assets/Scripts/Core/ObjectPool.cs) — การนำวัตถุกลับมาใช้

@@ -11,7 +11,6 @@ namespace MyArcade
 		private Player player;
 		private IBulletSpawner bullets;
 		private readonly Dictionary<EnemyType, ObjectPool<Enemy>> pools = new Dictionary<EnemyType, ObjectPool<Enemy>>();
-		private int alive;
 		private int aliveRegular;
 		private bool openingDone;
 		private float nextRegularAt;
@@ -49,7 +48,6 @@ namespace MyArcade
 
 		private void OnEnemyKilled(Enemy enemy)
 		{
-			alive--;
 			bool isBoss = enemy is Boss;
 			if (isBoss)
 			{
@@ -140,7 +138,6 @@ namespace MyArcade
 		private void StartBossFight()
 		{
 			Enemy.RetireAll();
-			alive = 0;
 			aliveRegular = 0;
 			BossActive = true;
 			bossSpawned = false;
@@ -154,7 +151,6 @@ namespace MyArcade
 			Enemy boss = GetPool(EnemyType.Boss).Get(Arena.RandomHiddenEdgePoint(), Quaternion.identity);
 			// each boss is tougher and quicker than the last
 			boss.ApplyLevel(1f + BossesDefeated * 0.25f, 1f); // later bosses stay open for less time (see Boss.OpenSeconds)
-			alive++;
 		}
 
 		private void OnEnemySplit(Vector3 at)
@@ -167,7 +163,6 @@ namespace MyArcade
 			{
 				Vector3 offset = Quaternion.Euler(0f, i * 180f + 40f, 0f) * Vector3.forward * 1.4f;
 				GetPool(EnemyType.Sprinter).Get(Arena.Clamp(at + offset), Quaternion.identity).ApplyLevel(1f, RegularSpeedScale());
-				alive++;
 				aliveRegular++;
 			}
 		}
@@ -177,7 +172,6 @@ namespace MyArcade
 			bool special = EnemyCatalog.Get(type).IsSpecial;
 			Enemy enemy = GetPool(type).Get(Arena.RandomHiddenEdgePoint(), Quaternion.identity);
 			enemy.ApplyLevel(1f + NormalKills / BossEveryKills * 0.15f, special ? 1f : RegularSpeedScale());
-			alive++;
 			if (!special)
 			{
 				aliveRegular++;

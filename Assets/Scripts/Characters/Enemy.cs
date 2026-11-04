@@ -73,6 +73,12 @@ namespace MyArcade
 
 		public static System.Collections.Generic.IReadOnlyList<Enemy> AllActive => Active;
 
+		// Bypass subclass guards while preserving damage, death events and pooling.
+		public virtual void TakeSlayerHit()
+		{
+			base.TakeDamage(Health, gameObject);
+		}
+
 		public virtual void OnDespawn()
 		{
 		}

@@ -276,10 +276,9 @@ namespace MyArcade
 			chargesDone++;
 			if (chargesDone < SubCharges)
 			{
-				if (Time.time >= phaseEndsAt + SubChargeGap)
-				{
-					BeginSubCharge();
-				}
+				phase = Phase.ChargeWarn;
+				phaseEndsAt = Time.time + SubChargeGap;
+				RaiseAttacked("windup");
 				return;
 			}
 			// the special is over: the guard breaks and he is thrown back
@@ -302,14 +301,14 @@ namespace MyArcade
 			}
 			if (!IsOpen)
 			{
-				GameEvents.RaiseDeflected(transform.position + Vector3.up);
+				GameEvents.RaiseEnemyGuarded(transform.position + Vector3.up);
 				GameEvents.RaiseSound("deflect");
 				return;
 			}
 			base.TakeDamage(amount, source);
 		}
 
-		public void TakeSlayerHit()
+		public override void TakeSlayerHit()
 		{
 			if (!IsDead)
 			{
