@@ -191,7 +191,7 @@ namespace MyArcade
 			{
 				// the swing goes toward the mouse, where the fighter faces
 				Vector3 facing = aim;
-				if (Stamina < StaminaPerSwing - 0.05f)
+				if (Stamina < StaminaPerSwing)
 				{
 					if (Time.time >= nextGaspTime)
 					{
@@ -205,7 +205,7 @@ namespace MyArcade
 					string clip = CurrentWeapon.TryUse(context);
 					if (clip != null)
 					{
-						Stamina = Mathf.Max(0.02f, Stamina - StaminaPerSwing);
+						Stamina = Mathf.Max(0f, Stamina - StaminaPerSwing);
 						staminaChargeAt = Time.time + StaminaChargeDelay;
 						attackDeflectUntil = Time.time + AttackDeflectFrame;
 						GameEvents.RaiseSwingStarted();

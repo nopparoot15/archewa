@@ -154,9 +154,11 @@ namespace MyArcade
 				transform.position = point;
 				return true;
 			}
+			int healthBefore = target is Character character ? character.Health : -1;
 			target.TakeDamage(damage, owner);
+			bool damaged = !(target is Character hitCharacter) || hitCharacter.Health < healthBefore;
 			CameraRig.Shake(1f, 0.08f, 0.015f);
-			if (team == Team.Player && target is Enemy)
+			if (damaged && team == Team.Player && target is Enemy)
 			{
 				GameEvents.RaiseBulletHitEnemy();
 			}

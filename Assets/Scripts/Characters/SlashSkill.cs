@@ -28,7 +28,7 @@ namespace MyArcade
 		private readonly LineRenderer trailPrefab;
 		private readonly LineRenderer flashLine; // the white streak left by the slash
 		private int combo;
-		private float aimEndsAt;
+		private float aimSecondsLeft;
 		private bool attackWasHeld;
 		private Vector3 target;
 
@@ -105,6 +105,7 @@ namespace MyArcade
 				return;
 			}
 
+			aimSecondsLeft -= Time.unscaledDeltaTime;
 			SlowMotion.Pulse(AimTimeScale, 0.12f); // asked every frame, so time stays slow while we aim
 			UpdateTarget(input);
 			DrawAim();
@@ -124,7 +125,7 @@ namespace MyArcade
 			{
 				BeginUltimate();
 			}
-			else if (input.SpecialPressed || Time.unscaledTime >= aimEndsAt)
+			else if (input.SpecialPressed || aimSecondsLeft <= 0f)
 			{
 				Cancel();
 			}
@@ -144,7 +145,7 @@ namespace MyArcade
 		private void BeginAim()
 		{
 			IsAiming = true;
-			aimEndsAt = Time.unscaledTime + AimSeconds;
+			aimSecondsLeft = AimSeconds;
 			attackWasHeld = true;
 			SetAimVisible(true);
 			GameEvents.RaiseSound("warning");
@@ -228,7 +229,7 @@ namespace MyArcade
 		private IEnumerator EndUltimate()
 		{
 			owner.PlaySkillPose("ult_end");
-			yield return new WaitForSecondsRealtime(0.5f);
+			yield return WaitForActiveSeconds(0.5f);
 			Points = 0f;
 			checkpoint = 0;
 			Enemy.Frozen = false;
@@ -297,7 +298,7 @@ namespace MyArcade
 			GameEvents.RaiseSound("swing");
 			StartFlash(from, to);
 
-			yield return new WaitForSecondsRealtime(0.3f);
+			yield return WaitForActiveSeconds(0.3f);
 
 			Enemy.Frozen = false;
 			int hits = 0;
@@ -323,6 +324,20 @@ namespace MyArcade
 			}
 
 			IsSlashing = false;
+		}
+
+		// Keep the real-time skill timing, but stop its clock while gameplay is paused.
+		private IEnumerator WaitForActiveSeconds(float seconds)
+		{
+			float elapsed = 0f;
+			while (elapsed < seconds)
+			{
+				yield return null;
+				if (owner.enabled)
+				{
+					elapsed += Time.unscaledDeltaTime;
+				}
+			}
 		}
 
 		private void SetAimVisible(bool visible)
@@ -362,6 +377,10 @@ namespace MyArcade
 			const float duration = 0.4f;
 			for (float t = 0f; t < duration; t += Time.unscaledDeltaTime)
 			{
+				while (!owner.enabled)
+				{
+					yield return null;
+				}
 				float k = 1f - t / duration;
 				var color = new Color(1f, 1f, 1f, k);
 				flashLine.startColor = color;
